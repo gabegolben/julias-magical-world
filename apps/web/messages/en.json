@@ -4,6 +4,7 @@
     "tagline": "Every child is the hero of their own story",
     "newStory": "Make a new story",
     "myLibrary": "My stories",
+    "parentArea": "Parent area",
     "languageLabel": "Language"
   },
   "create": {
@@ -61,7 +62,20 @@
   },
   "parent": {
     "dashboard": "Parent area",
-    "enterPin": "Enter your PIN",
+    "backHome": "Home",
+    "intro": "Create a free account to keep your child's stories safe in the cloud and open them on any device.",
+    "email": "Email",
+    "password": "Password (at least 6 characters)",
+    "signIn": "Sign in",
+    "signUp": "Create account",
+    "signOut": "Sign out",
+    "checkEmail": "Almost there! Open your email and tap the confirmation link.",
+    "signedInAs": "Signed in as {email}",
+    "syncNow": "Sync now",
+    "syncing": "Syncing...",
+    "synced": "{count, plural, =1 {1 story is} other {# stories are}} safe in the cloud",
+    "syncInfo": "Your library syncs automatically while you are signed in.",
+    "notConfigured": "Cloud accounts are not set up in this build. Everything is saved on this device.",
     "export": "Download PDF"
   },
   "storyData": {

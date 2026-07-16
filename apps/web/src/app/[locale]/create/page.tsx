@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { StoryBuilder } from "@/components/magic-mode/StoryBuilder";
 import { createStory, sanitizeChildName, type CharacterKey, type SettingKey } from "@/lib/stories";
+import { pushStory } from "@/lib/sync";
 
 /**
  * Demo mode: the story is assembled client-side from locale templates
@@ -24,6 +25,7 @@ export default function CreatePage() {
       settingKey as SettingKey,
       sanitizeChildName(childName),
     );
+    void pushStory(story); // cloud copy when a parent is signed in
     setTimeout(() => router.push(`/story?id=${story.id}`), 2400);
   }
 

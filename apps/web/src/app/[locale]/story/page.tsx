@@ -7,6 +7,7 @@ import { Link } from "@/i18n/navigation";
 import { ColoringCanvas } from "@/components/coloring/ColoringCanvas";
 import { lineArtDataUrl } from "@/lib/lineArt";
 import { storyStrings } from "@/lib/storyText";
+import { pushOpsDebounced } from "@/lib/sync";
 import {
   PAGES_PER_STORY,
   getStory,
@@ -114,7 +115,10 @@ function StoryView() {
         key={`${story.id}:${page}`}
         lineArtUrl={lineArtDataUrl(story.characterKey, story.settingKey, page, !!story.childName)}
         initialOps={loadOps(story.id, page)}
-        onOpsChange={(ops) => saveOps(story.id, page, ops)}
+        onOpsChange={(ops) => {
+          saveOps(story.id, page, ops);
+          pushOpsDebounced(story.id, page, ops);
+        }}
       />
 
       <nav className="flex w-full items-center justify-between gap-4">

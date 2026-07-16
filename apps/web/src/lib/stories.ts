@@ -99,6 +99,15 @@ export function createStory(
   return story;
 }
 
+/** Merge remote records into the local library (by id, newest first). */
+export function importStories(records: StoryRecord[]): void {
+  const local = listStories();
+  const known = new Set(local.map((s) => s.id));
+  const merged = [...local, ...records.filter((r) => !known.has(r.id))];
+  merged.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+  window.localStorage.setItem(STORIES_KEY, JSON.stringify(merged));
+}
+
 export function loadOps(storyId: string, page: number): FillOp[] {
   if (typeof window === "undefined") return [];
   try {

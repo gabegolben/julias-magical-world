@@ -27,12 +27,18 @@ pages, magic fill, read-aloud via the Web Speech API, and a localStorage
 library. It ships as a static export to GitHub Pages on every push to
 `main` (`.github/workflows/deploy.yml`).
 
-Supabase/Prisma setup (`.env.example`, `packages/db`) is only needed once
-the server-backed AI pipeline starts landing:
+**Optional cloud accounts (parent area):** create a Supabase project, set
+`NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY` (locally in
+`apps/web/.env.local`, on CI as GitHub Actions variables), and run
+`packages/db/supabase/migrations/0002_demo_sync.sql` in the Supabase SQL
+editor. Without them the app runs fully local — the parent area just says
+cloud accounts are off.
+
+The full Prisma schema (`packages/db/prisma`, `0001_rls.sql`) belongs to the
+upcoming server phase (AI pipeline, child profiles):
 
 ```bash
-cp .env.example .env.local        # fill in Supabase + provider keys
-npx prisma migrate dev -w @jmw/db # apply schema
+npx prisma migrate dev -w @jmw/db # apply schema (server phase)
 # then run packages/db/supabase/migrations/0001_rls.sql in Supabase SQL editor
 ```
 
@@ -57,7 +63,7 @@ cd packages/magic-fill && npm test
 | Week 10 — PDF export / "fridge mode" | ✅ print view (`/story/print?id=` colored, `?character=&setting=` blank coloring pages) |
 | Public shareable build | ✅ static export → GitHub Pages on every push to `main` |
 | PWA manifest + offline | ✅ manifest + minimal service worker (Serwist when app moves server-side) |
-| Week 2 — Supabase Auth flow | ⬜ next: parent signup + email verification |
+| Week 2 — Supabase Auth flow | ✅ parent signup/login + email verification ("email plus" consent) + cloud library sync via RLS |
 | Week 3 — real AI pipeline wiring (model bake-off) | ⬜ demo uses templates until models are pinned |
 
 ## The magic-fill engine (why it matters)

@@ -4,6 +4,7 @@
     "tagline": "Cada niño es el héroe de su propia historia",
     "newStory": "Crear una historia nueva",
     "myLibrary": "Mis historias",
+    "parentArea": "Zona de padres",
     "languageLabel": "Idioma"
   },
   "create": {
@@ -61,7 +62,20 @@
   },
   "parent": {
     "dashboard": "Zona de padres",
-    "enterPin": "Escribe tu PIN",
+    "backHome": "Inicio",
+    "intro": "Crea una cuenta gratuita para guardar las historias en la nube y abrirlas en cualquier dispositivo.",
+    "email": "Correo electrónico",
+    "password": "Contraseña (mínimo 6 caracteres)",
+    "signIn": "Iniciar sesión",
+    "signUp": "Crear cuenta",
+    "signOut": "Cerrar sesión",
+    "checkEmail": "¡Casi listo! Abre tu correo y toca el enlace de confirmación.",
+    "signedInAs": "Conectado como {email}",
+    "syncNow": "Sincronizar ahora",
+    "syncing": "Sincronizando...",
+    "synced": "{count, plural, =1 {1 historia está segura en la nube} other {# historias están seguras en la nube}}",
+    "syncInfo": "Tu biblioteca se sincroniza automáticamente mientras tengas la sesión iniciada.",
+    "notConfigured": "Las cuentas en la nube no están activas en esta versión. Todo se guarda en este dispositivo.",
     "export": "Descargar PDF"
   },
   "storyData": {

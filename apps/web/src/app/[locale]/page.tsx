@@ -32,6 +32,9 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
           📚 {t("myLibrary")}
         </Link>
       </div>
+      <Link href="/parent" className="font-body text-sm text-ink/50 underline underline-offset-4">
+        🔒 {t("parentArea")}
+      </Link>
       <nav aria-label={t("languageLabel")} className="mt-6 flex gap-4">
         {routing.locales.map((l) => (
           <Link
