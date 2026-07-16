@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { Baloo_2, Nunito } from "next/font/google";
 import { routing } from "@/i18n/routing";
+import { SwRegister } from "@/components/SwRegister";
 import "../globals.css";
 
 const display = Baloo_2({ subsets: ["latin"], variable: "--font-display" });
@@ -40,6 +41,7 @@ export default async function LocaleLayout({
     <html lang={locale} className={`${display.variable} ${body.variable}`}>
       <body className="min-h-dvh bg-paper font-body text-ink">
         <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>
+        <SwRegister />
       </body>
     </html>
   );

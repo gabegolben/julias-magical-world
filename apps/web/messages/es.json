@@ -40,7 +40,10 @@
     "celebrationTitle": "¡Bravo! ¡Terminaste la historia!",
     "celebrationText": "Tu obra de arte está guardada en tu biblioteca.",
     "makeAnother": "Crear otra historia",
-    "backToLibrary": "Mis historias"
+    "backToLibrary": "Mis historias",
+    "print": "Imprimir / Guardar PDF",
+    "preparingPrint": "Preparando tus páginas...",
+    "printFooter": "Creado en El Mundo Mágico de Julia"
   },
   "library": {
     "title": "Mis historias",

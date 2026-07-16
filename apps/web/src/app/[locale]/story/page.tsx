@@ -69,6 +69,9 @@ function StoryView() {
         <h1 className="font-display text-4xl text-ink">{t("story.celebrationTitle")}</h1>
         <p className="max-w-md font-body text-xl text-ink/70">{t("story.celebrationText")}</p>
         <div className="flex flex-col gap-4 sm:flex-row">
+          <Link href={`/story/print?id=${story.id}`} className="min-h-tap rounded-wobble border-4 border-ink bg-sunshine px-8 py-4 font-display text-xl text-ink shadow-[0_6px_0_#37305A]">
+            🖨️ {t("story.print")}
+          </Link>
           <Link href="/create" className="min-h-tap rounded-wobble border-4 border-ink bg-julia px-8 py-4 font-display text-xl text-white shadow-[0_6px_0_#37305A]">
             ✨ {t("story.makeAnother")}
           </Link>
@@ -87,8 +90,13 @@ function StoryView() {
           ←
         </Link>
         <h1 className="text-center font-display text-2xl text-ink sm:text-3xl">{title}</h1>
-        <span className="whitespace-nowrap font-body text-sm text-ink/60">
-          {t("story.pageOf", { current: page + 1, total: PAGES_PER_STORY })}
+        <span className="flex items-center gap-3">
+          <span className="whitespace-nowrap font-body text-sm text-ink/60">
+            {t("story.pageOf", { current: page + 1, total: PAGES_PER_STORY })}
+          </span>
+          <Link href={`/story/print?id=${story.id}`} aria-label={t("story.print")} className="rounded-wobble border-4 border-ink/20 bg-white px-3 py-2 font-display text-lg text-ink">
+            🖨️
+          </Link>
         </span>
       </header>
 

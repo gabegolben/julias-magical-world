@@ -53,10 +53,11 @@ cd packages/magic-fill && npm test
 | Week 4 — Magic Mode UI shell | ✅ StoryBuilder, OptionCard, ColoringCanvas, home page |
 | Weeks 5–6 — story creation flow, progress screen, story reader, read-aloud | ✅ **demo mode**: template stories + procedural SVG line art, no AI keys needed |
 | Week 10 — library with save/load | ✅ localStorage op-log persistence |
+| Week 10 — PDF export / "fridge mode" | ✅ print view (`/story/print?id=` colored, `?character=&setting=` blank coloring pages) |
 | Public shareable build | ✅ static export → GitHub Pages on every push to `main` |
+| PWA manifest + offline | ✅ manifest + minimal service worker (Serwist when app moves server-side) |
 | Week 2 — Supabase Auth flow | ⬜ next: parent signup + email verification |
 | Week 3 — real AI pipeline wiring (model bake-off) | ⬜ demo uses templates until models are pinned |
-| PWA (Serwist) manifest + offline | ⬜ manifest.json shipped; service worker pending |
 
 ## The magic-fill engine (why it matters)
 

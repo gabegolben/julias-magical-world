@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { buildLineMask, dilateMask, magicFillMasked } from "@jmw/magic-fill";
+import { hexToRgba } from "@/lib/color";
 import type { FillOp } from "@/lib/stories";
 
 /** Magic Mode 8-color palette (Overview §6, ages 3-5). */
@@ -10,13 +11,6 @@ const PALETTE = [
   "#E4572E", "#F3A712", "#FFE066", "#74C98F",
   "#8AD4F0", "#7C4DD8", "#F49FBC", "#8B5E3C",
 ] as const;
-
-const hexToRgba = (hex: string) => ({
-  r: parseInt(hex.slice(1, 3), 16),
-  g: parseInt(hex.slice(3, 5), 16),
-  b: parseInt(hex.slice(5, 7), 16),
-  a: 255,
-});
 
 /**
  * Tap-to-fill coloring surface (Plan, Weeks 7-9).

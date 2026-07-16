@@ -40,7 +40,10 @@
     "celebrationTitle": "Hooray! You finished the story!",
     "celebrationText": "Your masterpiece is saved in your library.",
     "makeAnother": "Make another story",
-    "backToLibrary": "My stories"
+    "backToLibrary": "My stories",
+    "print": "Print / Save PDF",
+    "preparingPrint": "Getting your pages ready...",
+    "printFooter": "Created in Julia's Magical World"
   },
   "library": {
     "title": "My stories",
