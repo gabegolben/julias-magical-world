@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { StoryBuilder } from "@/components/magic-mode/StoryBuilder";
-import { createStory, type CharacterKey, type SettingKey } from "@/lib/stories";
+import { createStory, sanitizeChildName, type CharacterKey, type SettingKey } from "@/lib/stories";
 
 /**
  * Demo mode: the story is assembled client-side from locale templates
@@ -17,9 +17,13 @@ export default function CreatePage() {
   const t = useTranslations("generating");
   const [generating, setGenerating] = useState(false);
 
-  function handleCreate(characterKey: string, settingKey: string) {
+  function handleCreate(characterKey: string, settingKey: string, childName: string) {
     setGenerating(true);
-    const story = createStory(characterKey as CharacterKey, settingKey as SettingKey);
+    const story = createStory(
+      characterKey as CharacterKey,
+      settingKey as SettingKey,
+      sanitizeChildName(childName),
+    );
     setTimeout(() => router.push(`/story?id=${story.id}`), 2400);
   }
 

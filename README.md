@@ -52,6 +52,7 @@ cd packages/magic-fill && npm test
 | Week 3 — magic-fill prototype (Risk #1) | ✅ **implemented + 8/8 tests passing**, incl. leak rollback, gap closing, tap-nudge, 1024² perf |
 | Week 4 — Magic Mode UI shell | ✅ StoryBuilder, OptionCard, ColoringCanvas, home page |
 | Weeks 5–6 — story creation flow, progress screen, story reader, read-aloud | ✅ **demo mode**: template stories + procedural SVG line art, no AI keys needed |
+| Weeks 5–6 — optional name insertion (parent-entered) | ✅ child becomes the protagonist (text in all 3 languages + child figure in the art) |
 | Week 10 — library with save/load | ✅ localStorage op-log persistence |
 | Week 10 — PDF export / "fridge mode" | ✅ print view (`/story/print?id=` colored, `?character=&setting=` blank coloring pages) |
 | Public shareable build | ✅ static export → GitHub Pages on every push to `main` |

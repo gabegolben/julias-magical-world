@@ -10,13 +10,19 @@ const SETTINGS = SETTING_KEYS.map((key) => ({ key, emoji: SETTING_EMOJI[key] }))
 
 /**
  * Two-tap story creation for Early Explorers (Plan, Weeks 5-6):
- * pick a friend → pick a place → make magic. No text input exists on this
- * screen by design (safety-by-construction).
+ * pick a friend → pick a place → make magic. The child's flow has no text
+ * input (safety-by-construction); the optional name field on the final
+ * step is visually framed as a grown-up extra, first name only.
  */
-export function StoryBuilder({ onCreate }: { onCreate: (characterKey: string, settingKey: string) => void }) {
+export function StoryBuilder({
+  onCreate,
+}: {
+  onCreate: (characterKey: string, settingKey: string, childName: string) => void;
+}) {
   const t = useTranslations("create");
   const [character, setCharacter] = useState<string | null>(null);
   const [setting, setSetting] = useState<string | null>(null);
+  const [childName, setChildName] = useState("");
 
   const step: "friend" | "place" | "ready" = !character ? "friend" : !setting ? "place" : "ready";
 
@@ -44,10 +50,25 @@ export function StoryBuilder({ onCreate }: { onCreate: (characterKey: string, se
         </div>
       )}
 
+      {step === "ready" && (
+        <label className="flex flex-col items-center gap-2 font-body text-sm text-ink/60">
+          {t("childNameLabel")}
+          <input
+            type="text"
+            value={childName}
+            onChange={(e) => setChildName(e.target.value)}
+            placeholder={t("childNamePlaceholder")}
+            maxLength={20}
+            autoComplete="off"
+            className="rounded-wobble border-4 border-ink/20 bg-white px-4 py-2 text-center font-display text-xl text-ink outline-none focus:border-julia"
+          />
+        </label>
+      )}
+
       {step === "ready" && character && setting && (
         <button
           type="button"
-          onClick={() => onCreate(character, setting)}
+          onClick={() => onCreate(character, setting, childName)}
           className="min-h-tap rounded-wobble border-4 border-ink bg-sunshine px-10 font-display text-3xl text-ink shadow-[0_8px_0_#37305A] transition-transform motion-safe:active:translate-y-1 motion-safe:active:shadow-[0_4px_0_#37305A] focus-visible:outline-4 focus-visible:outline-julia focus-visible:outline-offset-4"
         >
           ✨ {t("makeMagic")}

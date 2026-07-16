@@ -38,7 +38,21 @@ export interface StoryRecord {
   id: string;
   characterKey: CharacterKey;
   settingKey: SettingKey;
+  /** Parent-entered first name (Plan Weeks 5-6). When set, the child is the
+   *  protagonist and the character becomes their story friend. */
+  childName?: string;
   createdAt: string; // ISO
+}
+
+/** First name only, letters/spaces/hyphens, capped — no PII beyond that. */
+export function sanitizeChildName(raw: string): string | undefined {
+  const cleaned = raw
+    .replace(/[^\p{L} '\-]/gu, "")
+    .trim()
+    .slice(0, 20)
+    .trim();
+  if (!cleaned) return undefined;
+  return cleaned.charAt(0).toLocaleUpperCase() + cleaned.slice(1);
 }
 
 export interface FillOp {
@@ -64,7 +78,11 @@ export function getStory(id: string): StoryRecord | undefined {
   return listStories().find((s) => s.id === id);
 }
 
-export function createStory(characterKey: CharacterKey, settingKey: SettingKey): StoryRecord {
+export function createStory(
+  characterKey: CharacterKey,
+  settingKey: SettingKey,
+  childName?: string,
+): StoryRecord {
   const story: StoryRecord = {
     id:
       typeof crypto !== "undefined" && "randomUUID" in crypto
@@ -72,6 +90,7 @@ export function createStory(characterKey: CharacterKey, settingKey: SettingKey):
         : `${Date.now()}-${Math.random().toString(36).slice(2)}`,
     characterKey,
     settingKey,
+    ...(childName ? { childName } : {}),
     createdAt: new Date().toISOString(),
   };
   const all = listStories();

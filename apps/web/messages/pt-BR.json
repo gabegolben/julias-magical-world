@@ -10,6 +10,8 @@
     "pickFriend": "Quem é seu amigo?",
     "pickPlace": "Para onde vocês vão?",
     "makeMagic": "Fazer mágica!",
+    "childNameLabel": "Cantinho dos adultos: adicione o nome da criança (opcional)",
+    "childNamePlaceholder": "Primeiro nome",
     "characters": {
       "unicorn": "Unicórnio",
       "dinosaur": "Dinossauro",
@@ -64,11 +66,11 @@
   },
   "storyData": {
     "characters": {
-      "unicorn": { "name": "Luna", "intro": "A unicórnia Luna" },
-      "dinosaur": { "name": "Rex", "intro": "O dinossauro Rex" },
-      "princess": { "name": "Bella", "intro": "A princesa Bella" },
-      "robot": { "name": "Beep", "intro": "O robô Beep" },
-      "puppy": { "name": "Max", "intro": "O cachorrinho Max" }
+      "unicorn": { "name": "Luna", "intro": "A unicórnia Luna", "friend": "a unicórnia Luna" },
+      "dinosaur": { "name": "Rex", "intro": "O dinossauro Rex", "friend": "o dinossauro Rex" },
+      "princess": { "name": "Bella", "intro": "A princesa Bella", "friend": "a princesa Bella" },
+      "robot": { "name": "Beep", "intro": "O robô Beep", "friend": "o robô Beep" },
+      "puppy": { "name": "Max", "intro": "O cachorrinho Max", "friend": "o cachorrinho Max" }
     },
     "plots": {
       "beach": {
@@ -76,35 +78,60 @@
         "page1": "{intro} foi à praia num dia de muito sol. As ondas disseram olá: splash, splash!",
         "page2": "{name} construiu um castelo de areia gigante, com torres altas e uma portinha.",
         "page3": "Um caranguejo amigo acenou com a garra. “Vem brincar comigo, {name}!”",
-        "page4": "{name} viu o pôr do sol dourado de um barquinho. Que dia feliz!"
+        "page4": "{name} viu o pôr do sol dourado de um barquinho. Que dia feliz!",
+        "titleChild": "O Dia de Praia de {child}",
+        "page1Child": "{child} foi à praia com {friend} num dia de muito sol. As ondas disseram olá: splash, splash!",
+        "page2Child": "{child} construiu um castelo de areia gigante, e {friend} ajudou a cavar o fosso.",
+        "page3Child": "Um caranguejo amigo acenou com a garra. “Vem brincar comigo, {child}!”",
+        "page4Child": "{child} e {friend} viram o pôr do sol dourado de um barquinho. Que dia feliz!"
       },
       "forest": {
         "title": "A Aventura de {name} na Floresta",
         "page1": "{intro} entrou saltitando na floresta verdinha. As árvores acenaram com seus galhos.",
         "page2": "{name} encontrou uma casinha de cogumelo com uma portinha vermelha. Quem será que mora lá?",
         "page3": "Uma borboleta linda pousou bem em cima de {name}. Que cócegas!",
-        "page4": "{name} dançou com os amigos da floresta até as estrelas aparecerem. Boa noite, floresta!"
+        "page4": "{name} dançou com os amigos da floresta até as estrelas aparecerem. Boa noite, floresta!",
+        "titleChild": "A Aventura de {child} na Floresta",
+        "page1Child": "{child} entrou saltitando na floresta verdinha com {friend}. As árvores acenaram com seus galhos.",
+        "page2Child": "{child} encontrou uma casinha de cogumelo com uma portinha vermelha. Quem será que mora lá?",
+        "page3Child": "Uma borboleta linda pousou bem em cima de {child}. Que cócegas!",
+        "page4Child": "{child} e {friend} dançaram com os amigos da floresta até as estrelas aparecerem. Boa noite, floresta!"
       },
       "castle": {
         "title": "{name} e o Grande Castelo",
         "page1": "{intro} viu um castelo enorme no alto da colina. As bandeirinhas dançavam no vento.",
         "page2": "{name} subiu as escadas do castelo — um, dois, três — até a porta grandona.",
         "page3": "Lá dentro tinha uma festa com balões! Todo mundo aplaudiu {name}.",
-        "page4": "O rei disse: “{name}, ninguém no reino inteiro é mais corajoso que você!”"
+        "page4": "O rei disse: “{name}, ninguém no reino inteiro é mais corajoso que você!”",
+        "titleChild": "{child} e o Grande Castelo",
+        "page1Child": "{child} e {friend} viram um castelo enorme no alto da colina. As bandeirinhas dançavam no vento.",
+        "page2Child": "{child} subiu as escadas do castelo — um, dois, três — até a porta grandona.",
+        "page3Child": "Lá dentro tinha uma festa com balões! Todo mundo aplaudiu {child}.",
+        "page4Child": "O rei disse: “{child}, ninguém no reino inteiro é mais corajoso que você!”"
       },
       "space": {
         "title": "{name} Decola para o Espaço",
         "page1": "{intro} entrou num foguete brilhante. Três, dois, um... decolar!",
         "page2": "{name} pulou na Lua. Boing, boing, boing! A Terra parecia bem pequenininha.",
         "page3": "Uma estrelinha queria um abraço. {name} deu o maior abraço da galáxia.",
-        "page4": "{name} voltou para casa passando pelo planeta de anéis, dando boa noite para cada estrela."
+        "page4": "{name} voltou para casa passando pelo planeta de anéis, dando boa noite para cada estrela.",
+        "titleChild": "{child} Decola para o Espaço",
+        "page1Child": "{child} entrou num foguete brilhante com {friend}. Três, dois, um... decolar!",
+        "page2Child": "{child} pulou na Lua. Boing, boing, boing! A Terra parecia bem pequenininha.",
+        "page3Child": "Uma estrelinha queria um abraço. {child} deu o maior abraço da galáxia.",
+        "page4Child": "{child} e {friend} voltaram para casa passando pelo planeta de anéis, dando boa noite para cada estrela."
       },
       "farm": {
         "title": "O Dia de {name} na Fazenda",
         "page1": "{intro} visitou uma fazenda de manhãzinha. O grande celeiro vermelho deu as boas-vindas!",
         "page2": "{name} ajudou a alimentar as galinhas fofinhas e o porquinho cor-de-rosa.",
         "page3": "O trator levou {name} num passeio cheio de pulinhos pelo campo. Uhuuu!",
-        "page4": "A lua apareceu e os bichinhos bocejaram. Boa noite, fazenda. Boa noite, {name}."
+        "page4": "A lua apareceu e os bichinhos bocejaram. Boa noite, fazenda. Boa noite, {name}.",
+        "titleChild": "O Dia de {child} na Fazenda",
+        "page1Child": "{child} visitou uma fazenda com {friend} de manhãzinha. O grande celeiro vermelho deu as boas-vindas!",
+        "page2Child": "{child} ajudou a alimentar as galinhas fofinhas e o porquinho cor-de-rosa.",
+        "page3Child": "O trator levou {child} e {friend} num passeio cheio de pulinhos pelo campo. Uhuuu!",
+        "page4Child": "A lua apareceu e os bichinhos bocejaram. Boa noite, fazenda. Boa noite, {child}."
       }
     }
   }

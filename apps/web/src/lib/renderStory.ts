@@ -20,7 +20,9 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 }
 
 export async function renderColoredPage(story: StoryRecord, page: number): Promise<string> {
-  const img = await loadImage(lineArtDataUrl(story.characterKey, story.settingKey, page));
+  const img = await loadImage(
+    lineArtDataUrl(story.characterKey, story.settingKey, page, !!story.childName),
+  );
   const canvas = document.createElement("canvas");
   canvas.width = img.naturalWidth;
   canvas.height = img.naturalHeight;

@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ColoringCanvas } from "@/components/coloring/ColoringCanvas";
 import { lineArtDataUrl } from "@/lib/lineArt";
+import { storyStrings } from "@/lib/storyText";
 import {
   PAGES_PER_STORY,
   getStory,
@@ -48,10 +49,8 @@ function StoryView() {
     );
   }
 
-  const name = t(`storyData.characters.${story.characterKey}.name`);
-  const intro = t(`storyData.characters.${story.characterKey}.intro`);
-  const title = t(`storyData.plots.${story.settingKey}.title`, { name });
-  const text = t(`storyData.plots.${story.settingKey}.page${page + 1}`, { name, intro });
+  const { title, pageText } = storyStrings(t, story);
+  const text = pageText(page);
 
   function readAloud() {
     if (!("speechSynthesis" in window)) return;
@@ -113,7 +112,7 @@ function StoryView() {
 
       <ColoringCanvas
         key={`${story.id}:${page}`}
-        lineArtUrl={lineArtDataUrl(story.characterKey, story.settingKey, page)}
+        lineArtUrl={lineArtDataUrl(story.characterKey, story.settingKey, page, !!story.childName)}
         initialOps={loadOps(story.id, page)}
         onOpsChange={(ops) => saveOps(story.id, page, ops)}
       />

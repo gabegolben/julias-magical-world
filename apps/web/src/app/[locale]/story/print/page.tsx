@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { renderColoredPage } from "@/lib/renderStory";
+import { storyStrings } from "@/lib/storyText";
 import {
   CHARACTER_KEYS,
   PAGES_PER_STORY,
@@ -69,9 +70,7 @@ function PrintView() {
     );
   }
 
-  const name = t(`storyData.characters.${story.characterKey}.name`);
-  const intro = t(`storyData.characters.${story.characterKey}.intro`);
-  const title = t(`storyData.plots.${story.settingKey}.title`, { name });
+  const { title, pageText } = storyStrings(t, story);
 
   return (
     <main className="mx-auto max-w-3xl bg-white p-6 text-ink print:p-0">
@@ -110,9 +109,7 @@ function PrintView() {
               alt={t("story.pageOf", { current: p + 1, total: PAGES_PER_STORY })}
               className="w-full rounded border-2 border-ink/15 print:rounded-none"
             />
-            <p className="max-w-xl text-center font-body text-lg leading-relaxed">
-              {t(`storyData.plots.${story.settingKey}.page${p + 1}`, { name, intro })}
-            </p>
+            <p className="max-w-xl text-center font-body text-lg leading-relaxed">{pageText(p)}</p>
             <p className="text-center font-body text-xs text-ink/40">
               {t("story.printFooter")} · {t("story.pageOf", { current: p + 1, total: PAGES_PER_STORY })}
             </p>

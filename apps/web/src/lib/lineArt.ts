@@ -168,6 +168,26 @@ const puppy =
 
 const CHARACTERS: Record<CharacterKey, string> = { unicorn, dinosaur, princess, robot, puppy };
 
+/**
+ * The child protagonist — deliberately generic (round face, short wavy
+ * hair, tee + shorts) so any kid can see themselves in it. Drawn when a
+ * parent added a name (Plan Weeks 5-6: optional name insertion).
+ */
+const child =
+  rect(-34, -60, 26, 60, 11) +
+  rect(8, -60, 26, 60, 11) +
+  shape("M-30,-152 L-68,-92 L-52,-80 L-18,-136 Z") +
+  shape("M30,-152 L68,-92 L52,-80 L18,-136 Z") +
+  circle(-60, -84, 12) +
+  circle(60, -84, 12) +
+  shape("M-38,-160 L38,-160 L46,-55 L-46,-55 Z") +
+  stroke("M-46,-98 L46,-98", 7) +
+  circle(0, -200, 44) +
+  shape("M-44,-212 Q-38,-262 0,-262 Q38,-262 44,-212 Q28,-234 12,-226 Q0,-244 -14,-226 Q-30,-234 -44,-212 Z") +
+  dot(-15, -202, 6) +
+  dot(15, -202, 6) +
+  stroke("M-12,-182 q12,12 24,0");
+
 /* --------------------------------------------------------- */
 /* Settings — each returns scene art + character placement.   */
 /* --------------------------------------------------------- */
@@ -489,11 +509,26 @@ const SCENES: Record<SettingKey, (page: number) => Scene> = {
 };
 
 /** Full coloring page as an SVG data URL, safe to draw on a canvas (no CORS taint). */
-export function lineArtDataUrl(character: CharacterKey, setting: SettingKey, page: number): string {
+export function lineArtDataUrl(
+  character: CharacterKey,
+  setting: SettingKey,
+  page: number,
+  withChild = false,
+): string {
   const scene = SCENES[setting](page);
   const char = g(scene.charX, scene.charY, scene.charScale, CHARACTERS[character]);
+  // Child stands canvas-inward from the character; drawn after the scene so
+  // its white fill reads as standing in front of fences/hills.
+  const kid = withChild
+    ? g(
+        scene.charX + (scene.charX >= 500 ? 160 : -160) * scene.charScale,
+        scene.charY,
+        scene.charScale * 0.92,
+        child,
+      )
+    : "";
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">` +
-    `<rect width="${W}" height="${H}" fill="white"/>${scene.art}${char}</svg>`;
+    `<rect width="${W}" height="${H}" fill="white"/>${scene.art}${kid}${char}</svg>`;
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }

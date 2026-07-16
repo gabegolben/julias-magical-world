@@ -10,6 +10,8 @@
     "pickFriend": "¿Quién es tu amigo?",
     "pickPlace": "¿A dónde van?",
     "makeMagic": "¡Hacer magia!",
+    "childNameLabel": "Rincón de adultos: agrega el nombre de tu peque (opcional)",
+    "childNamePlaceholder": "Nombre",
     "characters": {
       "unicorn": "Unicornio",
       "dinosaur": "Dinosaurio",
@@ -64,11 +66,11 @@
   },
   "storyData": {
     "characters": {
-      "unicorn": { "name": "Luna", "intro": "La unicornia Luna" },
-      "dinosaur": { "name": "Rex", "intro": "El dinosaurio Rex" },
-      "princess": { "name": "Bella", "intro": "La princesa Bella" },
-      "robot": { "name": "Beep", "intro": "El robot Beep" },
-      "puppy": { "name": "Max", "intro": "El perrito Max" }
+      "unicorn": { "name": "Luna", "intro": "La unicornia Luna", "friend": "la unicornia Luna" },
+      "dinosaur": { "name": "Rex", "intro": "El dinosaurio Rex", "friend": "el dinosaurio Rex" },
+      "princess": { "name": "Bella", "intro": "La princesa Bella", "friend": "la princesa Bella" },
+      "robot": { "name": "Beep", "intro": "El robot Beep", "friend": "el robot Beep" },
+      "puppy": { "name": "Max", "intro": "El perrito Max", "friend": "el perrito Max" }
     },
     "plots": {
       "beach": {
@@ -76,35 +78,60 @@
         "page1": "{intro} fue a la playa en un día de mucho sol. Las olas dijeron hola: ¡splash, splash!",
         "page2": "{name} construyó un castillo de arena gigante, con torres altas y una puertita.",
         "page3": "Un cangrejo amistoso saludó con su pinza. “¡Ven a jugar conmigo, {name}!”",
-        "page4": "{name} miró el atardecer dorado desde un barquito. ¡Qué día tan feliz!"
+        "page4": "{name} miró el atardecer dorado desde un barquito. ¡Qué día tan feliz!",
+        "titleChild": "El día de playa de {child}",
+        "page1Child": "{child} fue a la playa con {friend} en un día de mucho sol. Las olas dijeron hola: ¡splash, splash!",
+        "page2Child": "{child} construyó un castillo de arena gigante, y {friend} ayudó a cavar el foso.",
+        "page3Child": "Un cangrejo amistoso saludó con su pinza. “¡Ven a jugar conmigo, {child}!”",
+        "page4Child": "{child} y {friend} miraron el atardecer dorado desde un barquito. ¡Qué día tan feliz!"
       },
       "forest": {
         "title": "La aventura de {name} en el bosque",
         "page1": "{intro} entró saltando al bosque verde, verde. Los árboles saludaron con sus ramas.",
         "page2": "{name} encontró una casita de hongo con una puertita roja. ¿Quién vivirá ahí?",
         "page3": "Una mariposa hermosa se posó justo sobre {name}. ¡Qué cosquillas!",
-        "page4": "{name} bailó con los amigos del bosque hasta que salieron las estrellas. ¡Buenas noches, bosque!"
+        "page4": "{name} bailó con los amigos del bosque hasta que salieron las estrellas. ¡Buenas noches, bosque!",
+        "titleChild": "La aventura de {child} en el bosque",
+        "page1Child": "{child} entró saltando al bosque verde, verde con {friend}. Los árboles saludaron con sus ramas.",
+        "page2Child": "{child} encontró una casita de hongo con una puertita roja. ¿Quién vivirá ahí?",
+        "page3Child": "Una mariposa hermosa se posó justo sobre {child}. ¡Qué cosquillas!",
+        "page4Child": "{child} y {friend} bailaron con los amigos del bosque hasta que salieron las estrellas. ¡Buenas noches, bosque!"
       },
       "castle": {
         "title": "{name} y el gran castillo",
         "page1": "{intro} vio un castillo enorme en lo alto de una colina. Sus banderitas bailaban con el viento.",
         "page2": "{name} subió las escaleras del castillo — uno, dos, tres — hasta la puerta grandota.",
         "page3": "¡Adentro había una fiesta con globos! Todos aplaudieron a {name}.",
-        "page4": "El rey dijo: “¡{name}, nadie en todo el reino es más valiente que tú!”"
+        "page4": "El rey dijo: “¡{name}, nadie en todo el reino es más valiente que tú!”",
+        "titleChild": "{child} y el gran castillo",
+        "page1Child": "{child} y {friend} vieron un castillo enorme en lo alto de una colina. Sus banderitas bailaban con el viento.",
+        "page2Child": "{child} subió las escaleras del castillo — uno, dos, tres — hasta la puerta grandota.",
+        "page3Child": "¡Adentro había una fiesta con globos! Todos aplaudieron a {child}.",
+        "page4Child": "El rey dijo: “¡{child}, nadie en todo el reino es más valiente que tú!”"
       },
       "space": {
         "title": "{name} despega al espacio",
         "page1": "{intro} subió a un cohete brillante. Tres, dos, uno... ¡despegue!",
         "page2": "{name} saltó en la Luna. ¡Boing, boing, boing! La Tierra se veía chiquitita.",
         "page3": "Una estrellita quería un abrazo. {name} le dio el abrazo más grande de la galaxia.",
-        "page4": "{name} voló a casa pasando por el planeta de anillos, dando las buenas noches a cada estrella."
+        "page4": "{name} voló a casa pasando por el planeta de anillos, dando las buenas noches a cada estrella.",
+        "titleChild": "{child} despega al espacio",
+        "page1Child": "{child} subió a un cohete brillante con {friend}. Tres, dos, uno... ¡despegue!",
+        "page2Child": "{child} saltó en la Luna. ¡Boing, boing, boing! La Tierra se veía chiquitita.",
+        "page3Child": "Una estrellita quería un abrazo. {child} le dio el abrazo más grande de la galaxia.",
+        "page4Child": "{child} y {friend} volaron a casa pasando por el planeta de anillos, dando las buenas noches a cada estrella."
       },
       "farm": {
         "title": "El día de {name} en la granja",
         "page1": "{intro} visitó una granja tempranito en la mañana. ¡El gran granero rojo le dio la bienvenida!",
         "page2": "{name} ayudó a alimentar a las gallinas esponjosas y al cerdito rosado.",
         "page3": "El tractor llevó a {name} a un paseo lleno de saltitos por el campo. ¡Yujuuu!",
-        "page4": "Salió la luna y todos los animalitos bostezaron. Buenas noches, granja. Buenas noches, {name}."
+        "page4": "Salió la luna y todos los animalitos bostezaron. Buenas noches, granja. Buenas noches, {name}.",
+        "titleChild": "El día de {child} en la granja",
+        "page1Child": "{child} visitó una granja con {friend} tempranito en la mañana. ¡El gran granero rojo le dio la bienvenida!",
+        "page2Child": "{child} ayudó a alimentar a las gallinas esponjosas y al cerdito rosado.",
+        "page3Child": "El tractor llevó a {child} y a {friend} a un paseo lleno de saltitos por el campo. ¡Yujuuu!",
+        "page4Child": "Salió la luna y todos los animalitos bostezaron. Buenas noches, granja. Buenas noches, {child}."
       }
     }
   }

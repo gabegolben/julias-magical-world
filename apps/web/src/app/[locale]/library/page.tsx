@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { storyStrings } from "@/lib/storyText";
 import {
   CHARACTER_EMOJI,
   SETTING_EMOJI,
@@ -53,11 +54,7 @@ export default function LibraryPage() {
                   {SETTING_EMOJI[s.settingKey]}
                 </span>
                 <span className="flex flex-col text-left">
-                  <span className="font-display text-xl text-ink">
-                    {t(`storyData.plots.${s.settingKey}.title`, {
-                      name: t(`storyData.characters.${s.characterKey}.name`),
-                    })}
-                  </span>
+                  <span className="font-display text-xl text-ink">{storyStrings(t, s).title}</span>
                   <span className="font-body text-sm text-ink/60">{dateFmt.format(new Date(s.createdAt))}</span>
                 </span>
               </Link>
