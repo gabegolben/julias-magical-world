@@ -1,0 +1,108 @@
+{
+  "home": {
+    "title": "Julia's Magical World",
+    "tagline": "Every child is the hero of their own story",
+    "newStory": "Make a new story",
+    "myLibrary": "My stories",
+    "languageLabel": "Language"
+  },
+  "create": {
+    "pickFriend": "Who is your friend?",
+    "pickPlace": "Where do you go?",
+    "makeMagic": "Make magic!",
+    "characters": {
+      "unicorn": "Unicorn",
+      "dinosaur": "Dinosaur",
+      "princess": "Princess",
+      "robot": "Robot",
+      "puppy": "Puppy"
+    },
+    "settings": {
+      "beach": "Beach",
+      "forest": "Forest",
+      "castle": "Castle",
+      "space": "Space",
+      "farm": "Farm"
+    }
+  },
+  "generating": {
+    "title": "Your story is coming to life...",
+    "hint": "The magic wand is drawing your pictures"
+  },
+  "story": {
+    "notFound": "We couldn't find that story.",
+    "backHome": "Home",
+    "pageOf": "Page {current} of {total}",
+    "readToMe": "Read to me",
+    "previous": "Back",
+    "next": "Next",
+    "finish": "The end!",
+    "celebrationTitle": "Hooray! You finished the story!",
+    "celebrationText": "Your masterpiece is saved in your library.",
+    "makeAnother": "Make another story",
+    "backToLibrary": "My stories"
+  },
+  "library": {
+    "title": "My stories",
+    "empty": "No stories here yet. Let's make your first one!",
+    "new": "Make a new story"
+  },
+  "coloring": {
+    "pickColor": "Pick a color",
+    "allDone": "All done!",
+    "showParent": "Show a grown-up",
+    "undo": "Undo",
+    "tryElsewhere": "Try tapping somewhere else"
+  },
+  "parent": {
+    "dashboard": "Parent area",
+    "enterPin": "Enter your PIN",
+    "export": "Download PDF"
+  },
+  "storyData": {
+    "characters": {
+      "unicorn": { "name": "Luna", "intro": "Luna the unicorn" },
+      "dinosaur": { "name": "Rex", "intro": "Rex the dinosaur" },
+      "princess": { "name": "Bella", "intro": "Princess Bella" },
+      "robot": { "name": "Beep", "intro": "Beep the robot" },
+      "puppy": { "name": "Max", "intro": "Max the puppy" }
+    },
+    "plots": {
+      "beach": {
+        "title": "{name}'s Splashy Beach Day",
+        "page1": "{intro} went to the beach on a big sunny day. The waves said hello: splash, splash!",
+        "page2": "{name} built a giant sandcastle with tall towers and a little door.",
+        "page3": "A friendly crab waved its claw. “Come and play with me, {name}!”",
+        "page4": "{name} watched the golden sunset from a little boat. What a splashy, happy day!"
+      },
+      "forest": {
+        "title": "{name}'s Forest Adventure",
+        "page1": "{intro} skipped into the green, green forest. The trees waved their leafy arms.",
+        "page2": "{name} found a mushroom house with a tiny red door. Who could live there?",
+        "page3": "A beautiful butterfly landed right on {name}. It tickled!",
+        "page4": "{name} danced with the forest friends until the stars came out. Good night, forest!"
+      },
+      "castle": {
+        "title": "{name} and the Big Castle",
+        "page1": "{intro} saw a big castle on top of a hill. Its flags danced in the wind.",
+        "page2": "{name} climbed the castle steps — one, two, three — all the way to the big door.",
+        "page3": "Inside there was a party with balloons! Everyone cheered for {name}.",
+        "page4": "The king said: “{name}, you are the bravest friend in all the kingdom!”"
+      },
+      "space": {
+        "title": "{name} Blasts Off to Space",
+        "page1": "{intro} climbed into a shiny rocket. Three, two, one... blast off!",
+        "page2": "{name} bounced on the moon. Boing, boing, boing! The Earth looked tiny far away.",
+        "page3": "A little star wanted a hug. {name} gave it the biggest hug in the galaxy.",
+        "page4": "{name} flew home past the ringed planet, waving good night to every star."
+      },
+      "farm": {
+        "title": "{name}'s Day at the Farm",
+        "page1": "{intro} visited a farm early in the morning. The big red barn said welcome!",
+        "page2": "{name} helped feed the fluffy chickens and the happy pink pig.",
+        "page3": "The tractor took {name} on a bumpy, bouncy ride around the field. Wheee!",
+        "page4": "The moon came up and all the animals yawned. Good night, farm. Good night, {name}."
+      }
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "@jmw/magic-fill",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "node --experimental-strip-types --test test/magicFill.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}

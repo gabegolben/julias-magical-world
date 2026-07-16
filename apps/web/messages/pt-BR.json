@@ -1,0 +1,108 @@
+{
+  "home": {
+    "title": "Mundo Mágico da Julia",
+    "tagline": "Toda criança é a heroína da sua própria história",
+    "newStory": "Criar uma história nova",
+    "myLibrary": "Minhas histórias",
+    "languageLabel": "Idioma"
+  },
+  "create": {
+    "pickFriend": "Quem é seu amigo?",
+    "pickPlace": "Para onde vocês vão?",
+    "makeMagic": "Fazer mágica!",
+    "characters": {
+      "unicorn": "Unicórnio",
+      "dinosaur": "Dinossauro",
+      "princess": "Princesa",
+      "robot": "Robô",
+      "puppy": "Cachorrinho"
+    },
+    "settings": {
+      "beach": "Praia",
+      "forest": "Floresta",
+      "castle": "Castelo",
+      "space": "Espaço",
+      "farm": "Fazenda"
+    }
+  },
+  "generating": {
+    "title": "Sua história está ganhando vida...",
+    "hint": "A varinha mágica está desenhando suas figuras"
+  },
+  "story": {
+    "notFound": "Não encontramos essa história.",
+    "backHome": "Início",
+    "pageOf": "Página {current} de {total}",
+    "readToMe": "Leia para mim",
+    "previous": "Voltar",
+    "next": "Próxima",
+    "finish": "Fim!",
+    "celebrationTitle": "Oba! Você terminou a história!",
+    "celebrationText": "Sua obra de arte está guardada na sua biblioteca.",
+    "makeAnother": "Criar outra história",
+    "backToLibrary": "Minhas histórias"
+  },
+  "library": {
+    "title": "Minhas histórias",
+    "empty": "Ainda não tem nenhuma história aqui. Vamos criar a primeira?",
+    "new": "Criar uma história nova"
+  },
+  "coloring": {
+    "pickColor": "Escolha uma cor",
+    "allDone": "Pronto!",
+    "showParent": "Mostrar para um adulto",
+    "undo": "Desfazer",
+    "tryElsewhere": "Tente tocar em outro lugar"
+  },
+  "parent": {
+    "dashboard": "Área dos pais",
+    "enterPin": "Digite seu PIN",
+    "export": "Baixar PDF"
+  },
+  "storyData": {
+    "characters": {
+      "unicorn": { "name": "Luna", "intro": "A unicórnia Luna" },
+      "dinosaur": { "name": "Rex", "intro": "O dinossauro Rex" },
+      "princess": { "name": "Bella", "intro": "A princesa Bella" },
+      "robot": { "name": "Beep", "intro": "O robô Beep" },
+      "puppy": { "name": "Max", "intro": "O cachorrinho Max" }
+    },
+    "plots": {
+      "beach": {
+        "title": "O Dia de Praia de {name}",
+        "page1": "{intro} foi à praia num dia de muito sol. As ondas disseram olá: splash, splash!",
+        "page2": "{name} construiu um castelo de areia gigante, com torres altas e uma portinha.",
+        "page3": "Um caranguejo amigo acenou com a garra. “Vem brincar comigo, {name}!”",
+        "page4": "{name} viu o pôr do sol dourado de um barquinho. Que dia feliz!"
+      },
+      "forest": {
+        "title": "A Aventura de {name} na Floresta",
+        "page1": "{intro} entrou saltitando na floresta verdinha. As árvores acenaram com seus galhos.",
+        "page2": "{name} encontrou uma casinha de cogumelo com uma portinha vermelha. Quem será que mora lá?",
+        "page3": "Uma borboleta linda pousou bem em cima de {name}. Que cócegas!",
+        "page4": "{name} dançou com os amigos da floresta até as estrelas aparecerem. Boa noite, floresta!"
+      },
+      "castle": {
+        "title": "{name} e o Grande Castelo",
+        "page1": "{intro} viu um castelo enorme no alto da colina. As bandeirinhas dançavam no vento.",
+        "page2": "{name} subiu as escadas do castelo — um, dois, três — até a porta grandona.",
+        "page3": "Lá dentro tinha uma festa com balões! Todo mundo aplaudiu {name}.",
+        "page4": "O rei disse: “{name}, ninguém no reino inteiro é mais corajoso que você!”"
+      },
+      "space": {
+        "title": "{name} Decola para o Espaço",
+        "page1": "{intro} entrou num foguete brilhante. Três, dois, um... decolar!",
+        "page2": "{name} pulou na Lua. Boing, boing, boing! A Terra parecia bem pequenininha.",
+        "page3": "Uma estrelinha queria um abraço. {name} deu o maior abraço da galáxia.",
+        "page4": "{name} voltou para casa passando pelo planeta de anéis, dando boa noite para cada estrela."
+      },
+      "farm": {
+        "title": "O Dia de {name} na Fazenda",
+        "page1": "{intro} visitou uma fazenda de manhãzinha. O grande celeiro vermelho deu as boas-vindas!",
+        "page2": "{name} ajudou a alimentar as galinhas fofinhas e o porquinho cor-de-rosa.",
+        "page3": "O trator levou {name} num passeio cheio de pulinhos pelo campo. Uhuuu!",
+        "page4": "A lua apareceu e os bichinhos bocejaram. Boa noite, fazenda. Boa noite, {name}."
+      }
+    }
+  }
+}

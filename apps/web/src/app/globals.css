@@ -1,0 +1,6 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Baloo 2 + Nunito are self-hosted via next/font in production;
+   fallback stack keeps dev readable without network. */

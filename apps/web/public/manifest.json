@@ -1,0 +1,10 @@
+{
+  "name": "Julia's Magical World",
+  "short_name": "Julia's World",
+  "description": "Every child is the hero of their own story.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#FFF6E9",
+  "theme_color": "#FFF6E9",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

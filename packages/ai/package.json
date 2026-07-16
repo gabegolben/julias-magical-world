@@ -1,0 +1,15 @@
+{
+  "name": "@jmw/ai",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "dependencies": {
+    "zod": "^3.23.0",
+    "inngest": "^3.22.0",
+    "openai": "^4.60.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}

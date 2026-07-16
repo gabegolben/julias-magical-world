@@ -1,0 +1,135 @@
+// Julia's Magical World — data model (Implementation Plan, Week 2)
+// COPPA note: ChildProfile stores NO PII beyond a display nickname.
+// All child data hangs off a verified Parent account.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum AgeBand {
+  EARLY_EXPLORER // 3-5
+  STORY_BUILDER  // 6-9
+  YOUNG_CREATOR  // 10-14
+}
+
+enum StoryStatus {
+  PENDING     // queued for generation
+  GENERATING
+  SAFETY_REVIEW
+  READY
+  FAILED
+  ARCHIVED
+}
+
+enum IllustrationStyle {
+  STORYBOOK_CLASSIC
+  CARTOON_BOLD
+  WATERCOLOR_SOFT
+  MANGA_SKETCH
+}
+
+enum SubscriptionTier {
+  EXPLORER // free
+  CREATOR  // $7.99/mo or $59.99/yr
+  LEGEND   // $149 lifetime
+}
+
+model Parent {
+  id               String        @id @default(uuid()) @db.Uuid
+  authUserId       String        @unique @db.Uuid // Supabase auth.users.id
+  email            String        @unique
+  emailVerifiedAt  DateTime?     // COPPA "email plus" consent anchor
+  locale           String        @default("en") // en | pt-BR | es
+  parentPinHash    String?       // gates the parent dashboard on shared devices
+  tier             SubscriptionTier @default(EXPLORER)
+  stripeCustomerId String?       @unique
+  children         ChildProfile[]
+  auditLogs        AuditLog[]
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+}
+
+model ChildProfile {
+  id           String    @id @default(uuid()) @db.Uuid
+  parentId     String    @db.Uuid
+  parent       Parent    @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  displayName  String    @db.VarChar(30) // nickname only — never full name
+  ageBand      AgeBand
+  avatarKey    String    @default("unicorn") // preset avatar, no photos
+  stories      Story[]
+  storiesThisMonth Int   @default(0) // free-tier limit enforcement (5/mo)
+  monthResetAt DateTime  @default(now())
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([parentId])
+}
+
+model Story {
+  id          String      @id @default(uuid()) @db.Uuid
+  childId     String      @db.Uuid
+  child       ChildProfile @relation(fields: [childId], references: [id], onDelete: Cascade)
+  title       String      @default("")
+  language    String      // en | pt-BR | es — set at generation time
+  style       IllustrationStyle
+  status      StoryStatus @default(PENDING)
+  ageBand     AgeBand     // frozen at creation (child may age up later)
+  // Generation inputs (template mode — ages 3-5 have no free text)
+  characterKey String
+  settingKey   String
+  childName    String?    @db.VarChar(30) // parent-entered first name, optional
+  failReason   String?
+  pages       StoryPage[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([childId, createdAt])
+}
+
+model StoryPage {
+  id            String   @id @default(uuid()) @db.Uuid
+  storyId       String   @db.Uuid
+  story         Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  pageNumber    Int
+  text          String
+  illustrationPrompt String
+  lineArtUrl    String?  // Supabase Storage path
+  audioUrl      String?  // pre-generated TTS narration
+  paletteHint   Json?    // suggested colors from the story engine
+  coloring      Coloring?
+  createdAt     DateTime @default(now())
+
+  @@unique([storyId, pageNumber])
+}
+
+model Coloring {
+  id          String    @id @default(uuid()) @db.Uuid
+  pageId      String    @unique @db.Uuid
+  page        StoryPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  // Compact fill/stroke op log — replayable, tiny compared to raster snapshots
+  canvasOps   Json      @default("[]")
+  snapshotUrl String?   // periodic PNG snapshot for library thumbnails
+  completedAt DateTime?
+  updatedAt   DateTime  @updatedAt
+}
+
+// Every AI interaction logged for safety review (Overview §14.2)
+model AuditLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  parentId  String?  @db.Uuid
+  parent    Parent?  @relation(fields: [parentId], references: [id], onDelete: SetNull)
+  kind      String   // story_generation | image_generation | moderation_flag
+  // NEVER include child names or free-text child input in payload metadata
+  payload   Json
+  flagged   Boolean  @default(false)
+  reviewedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([flagged, createdAt])
+}

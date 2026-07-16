@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Julia's Magical World</title>
+<style>
+  body { margin: 0; min-height: 100dvh; display: flex; align-items: center; justify-content: center;
+         background: #FFF6E9; color: #37305A; font-family: system-ui, sans-serif; }
+  a { color: #7C4DD8; font-size: 1.25rem; margin: 0 .5rem; }
+</style>
+<script>
+  // Language landing: send the visitor to their language, default English.
+  (function () {
+    var langs = (navigator.languages || [navigator.language || "en"]).map(function (l) {
+      return String(l).toLowerCase();
+    });
+    var pick = "en";
+    for (var i = 0; i < langs.length; i++) {
+      if (langs[i].indexOf("pt") === 0) { pick = "pt-BR"; break; }
+      if (langs[i].indexOf("es") === 0) { pick = "es"; break; }
+      if (langs[i].indexOf("en") === 0) { pick = "en"; break; }
+    }
+    location.replace("./" + pick + "/");
+  })();
+</script>
+</head>
+<body>
+<noscript>
+  <p><a href="./en/">English</a> · <a href="./pt-BR/">Português</a> · <a href="./es/">Español</a></p>
+</noscript>
+</body>
+</html>
