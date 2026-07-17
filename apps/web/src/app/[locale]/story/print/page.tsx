@@ -8,9 +8,9 @@ import { renderColoredPage } from "@/lib/renderStory";
 import { storyStrings } from "@/lib/storyText";
 import {
   CHARACTER_KEYS,
-  PAGES_PER_STORY,
   SETTING_KEYS,
   getStory,
+  storyPageCount,
   type CharacterKey,
   type SettingKey,
   type StoryRecord,
@@ -52,7 +52,7 @@ function PrintView() {
     if (s) {
       const record = s;
       Promise.all(
-        Array.from({ length: PAGES_PER_STORY }, (_, p) => renderColoredPage(record, p)),
+        Array.from({ length: storyPageCount(record) }, (_, p) => renderColoredPage(record, p)),
       ).then(setImages);
     }
   }, [id, character, setting]);
@@ -106,12 +106,12 @@ function PrintView() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={src}
-              alt={t("story.pageOf", { current: p + 1, total: PAGES_PER_STORY })}
+              alt={t("story.pageOf", { current: p + 1, total: images.length })}
               className="w-full rounded border-2 border-ink/15 print:rounded-none"
             />
             <p className="max-w-xl text-center font-body text-lg leading-relaxed">{pageText(p)}</p>
             <p className="text-center font-body text-xs text-ink/40">
-              {t("story.printFooter")} · {t("story.pageOf", { current: p + 1, total: PAGES_PER_STORY })}
+              {t("story.printFooter")} · {t("story.pageOf", { current: p + 1, total: images.length })}
             </p>
           </section>
         ))}

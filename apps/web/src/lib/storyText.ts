@@ -10,6 +10,11 @@ type Translator = ReturnType<typeof useTranslations>;
  * child, with the character as their story friend (`*Child` variants).
  */
 export function storyStrings(t: Translator, story: StoryRecord) {
+  // AI-generated stories carry their own text (in their creation language).
+  if (story.title && story.pagesText) {
+    const pages = story.pagesText;
+    return { title: story.title, pageText: (page: number) => pages[page] ?? "" };
+  }
   const plot = `storyData.plots.${story.settingKey}`;
   if (story.childName) {
     const child = story.childName;

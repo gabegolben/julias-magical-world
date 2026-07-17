@@ -34,9 +34,15 @@ export interface PipelineResult {
 
 const STORY_ATTEMPTS = 3; // 1 try + 2 retries, mirroring the Inngest config
 
+export interface PipelineOptions {
+  /** Skip illustration generation (text-only callers, e.g. the v0 API route). */
+  generateImages?: boolean;
+}
+
 export async function runStoryPipeline(
   request: StoryRequest,
   providers: PipelineProviders,
+  options: PipelineOptions = {},
 ): Promise<PipelineResult> {
   const req = StoryRequestSchema.parse(request);
 
@@ -71,6 +77,10 @@ export async function runStoryPipeline(
 
   if (flags.length > 0) {
     return { status: "SAFETY_REVIEW", story, flags };
+  }
+
+  if (options.generateImages === false) {
+    return { status: "READY", story, flags };
   }
 
   // 4. Illustrations — parallel, one per page.

@@ -9,10 +9,10 @@ import { lineArtDataUrl } from "@/lib/lineArt";
 import { storyStrings } from "@/lib/storyText";
 import { pushOpsDebounced } from "@/lib/sync";
 import {
-  PAGES_PER_STORY,
   getStory,
   loadOps,
   saveOps,
+  storyPageCount,
   type StoryRecord,
 } from "@/lib/stories";
 
@@ -52,6 +52,7 @@ function StoryView() {
 
   const { title, pageText } = storyStrings(t, story);
   const text = pageText(page);
+  const totalPages = storyPageCount(story);
 
   function readAloud() {
     if (!("speechSynthesis" in window)) return;
@@ -92,7 +93,7 @@ function StoryView() {
         <h1 className="text-center font-display text-2xl text-ink sm:text-3xl">{title}</h1>
         <span className="flex items-center gap-3">
           <span className="whitespace-nowrap font-body text-sm text-ink/60">
-            {t("story.pageOf", { current: page + 1, total: PAGES_PER_STORY })}
+            {t("story.pageOf", { current: page + 1, total: totalPages })}
           </span>
           <Link href={`/story/print?id=${story.id}`} aria-label={t("story.print")} className="rounded-wobble border-4 border-ink/20 bg-white px-3 py-2 font-display text-lg text-ink">
             🖨️
@@ -131,11 +132,11 @@ function StoryView() {
           ← {t("story.previous")}
         </button>
         <div aria-hidden className="flex gap-2">
-          {Array.from({ length: PAGES_PER_STORY }, (_, i) => (
+          {Array.from({ length: totalPages }, (_, i) => (
             <span key={i} className={`h-3 w-3 rounded-full ${i === page ? "bg-julia" : "bg-ink/20"}`} />
           ))}
         </div>
-        {page < PAGES_PER_STORY - 1 ? (
+        {page < totalPages - 1 ? (
           <button
             type="button"
             onClick={() => setPage((p) => p + 1)}

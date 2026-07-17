@@ -16,7 +16,9 @@
     "next-intl": "^3.26.0",
     "@supabase/supabase-js": "^2.45.0",
     "zustand": "^5.0.0",
-    "@jmw/magic-fill": "*"
+    "zod": "^3.25.76",
+    "@jmw/magic-fill": "*",
+    "@jmw/ai": "*"
   },
   "devDependencies": {
     "typescript": "^5.5.0",

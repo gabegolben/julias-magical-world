@@ -1,32 +1,46 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { StoryBuilder } from "@/components/magic-mode/StoryBuilder";
 import { createStory, sanitizeChildName, type CharacterKey, type SettingKey } from "@/lib/stories";
+import { generateAiStory } from "@/lib/aiStories";
 import { pushStory } from "@/lib/sync";
 
 /**
- * Demo mode: the story is assembled client-side from locale templates
- * (see lib/stories.ts) — no server, no keys, works offline. The short
- * "magic" pause keeps the moment of anticipation the real AI pipeline
- * will need anyway (Plan, Weeks 5-6: make waiting delightful).
+ * Story creation. Signed-in parents on the server build get a real
+ * AI-generated story (Haiku via /api/generate); everyone else — signed out,
+ * offline, or on the static mirror — gets the template engine. The child
+ * can't tell the difference in flow: pick, magic, story.
  */
 export default function CreatePage() {
   const router = useRouter();
+  const locale = useLocale();
   const t = useTranslations("generating");
   const [generating, setGenerating] = useState(false);
 
-  function handleCreate(characterKey: string, settingKey: string, childName: string) {
+  async function handleCreate(characterKey: string, settingKey: string, childName: string) {
     setGenerating(true);
+    const name = sanitizeChildName(childName);
+    // Keep the magic moment at least as long as the animation beat.
+    const [aiStory] = await Promise.all([
+      generateAiStory({
+        characterKey: characterKey as CharacterKey,
+        settingKey: settingKey as SettingKey,
+        language: locale,
+        ...(name ? { childName: name } : {}),
+      }),
+      new Promise((resolve) => setTimeout(resolve, 2400)),
+    ]);
     const story = createStory(
       characterKey as CharacterKey,
       settingKey as SettingKey,
-      sanitizeChildName(childName),
+      name,
+      aiStory ?? undefined,
     );
     void pushStory(story); // cloud copy when a parent is signed in
-    setTimeout(() => router.push(`/story?id=${story.id}`), 2400);
+    router.push(`/story?id=${story.id}`);
   }
 
   if (generating) {

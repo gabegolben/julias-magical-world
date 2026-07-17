@@ -41,7 +41,16 @@ export interface StoryRecord {
   /** Parent-entered first name (Plan Weeks 5-6). When set, the child is the
    *  protagonist and the character becomes their story friend. */
   childName?: string;
+  /** AI-generated stories carry their own text; template stories derive
+   *  text from locale files and leave these unset. */
+  title?: string;
+  pagesText?: string[];
   createdAt: string; // ISO
+}
+
+/** Page count for a story: AI stories bring their own, templates are fixed. */
+export function storyPageCount(story: StoryRecord): number {
+  return story.pagesText?.length ?? PAGES_PER_STORY;
 }
 
 /** First name only, letters/spaces/hyphens, capped — no PII beyond that. */
@@ -82,6 +91,7 @@ export function createStory(
   characterKey: CharacterKey,
   settingKey: SettingKey,
   childName?: string,
+  aiStory?: { title: string; pagesText: string[] },
 ): StoryRecord {
   const story: StoryRecord = {
     id:
@@ -91,6 +101,7 @@ export function createStory(
     characterKey,
     settingKey,
     ...(childName ? { childName } : {}),
+    ...(aiStory ? { title: aiStory.title, pagesText: aiStory.pagesText } : {}),
     createdAt: new Date().toISOString(),
   };
   const all = listStories();

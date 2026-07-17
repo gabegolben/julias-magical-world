@@ -13,11 +13,11 @@
 
 import { getSupabase } from "./supabase";
 import {
-  PAGES_PER_STORY,
   importStories,
   listStories,
   loadOps,
   saveOps,
+  storyPageCount,
   type CharacterKey,
   type FillOp,
   type SettingKey,
@@ -29,6 +29,8 @@ interface StoryRow {
   character_key: string;
   setting_key: string;
   child_name: string | null;
+  title: string | null;
+  pages: string[] | null;
   created_at: string;
 }
 
@@ -37,6 +39,8 @@ const toRow = (s: StoryRecord) => ({
   character_key: s.characterKey,
   setting_key: s.settingKey,
   child_name: s.childName ?? null,
+  title: s.title ?? null,
+  pages: s.pagesText ?? null,
   created_at: s.createdAt,
 });
 
@@ -45,6 +49,7 @@ const fromRow = (r: StoryRow): StoryRecord => ({
   characterKey: r.character_key as CharacterKey,
   settingKey: r.setting_key as SettingKey,
   ...(r.child_name ? { childName: r.child_name } : {}),
+  ...(r.title && r.pages ? { title: r.title, pagesText: r.pages } : {}),
   createdAt: r.created_at,
 });
 
@@ -115,7 +120,7 @@ export async function fullSync(): Promise<SyncResult | null> {
     if (pushError) throw pushError;
 
     const colorings = local.flatMap((s) =>
-      Array.from({ length: PAGES_PER_STORY }, (_, page) => ({ story: s, page }))
+      Array.from({ length: storyPageCount(s) }, (_, page) => ({ story: s, page }))
         .map(({ story, page }) => ({ story_id: story.id, page, ops: loadOps(story.id, page) }))
         .filter((c) => c.ops.length > 0),
     );

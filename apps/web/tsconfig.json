@@ -15,6 +15,7 @@
     "skipLibCheck": true,
     "isolatedModules": true,
     "incremental": true,
+    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "paths": {
       "@/*": [

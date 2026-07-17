@@ -21,11 +21,14 @@ npm test                          # magic-fill suite (8 tests, no deps needed)
 npm run dev                       # http://localhost:3000 — no keys needed
 ```
 
-The current build is a **fully client-side demo** of the Julia loop:
-template-based stories (EN/PT-BR/ES), procedurally generated SVG coloring
-pages, magic fill, read-aloud via the Web Speech API, and a localStorage
-library. It ships as a static export to GitHub Pages on every push to
-`main` (`.github/workflows/deploy.yml`).
+One codebase, two deployments:
+
+- **Vercel (server mode)** — signed-in parents get real AI-generated story
+  text via `/api/generate` (Claude Haiku, `STORY_MODEL` env; premium tiers
+  via `STORY_MODEL_PREMIUM`); everyone else gets template stories.
+- **GitHub Pages (`STATIC_EXPORT=1`)** — the fully client-side free mirror:
+  template stories, procedural SVG coloring pages, magic fill, read-aloud,
+  localStorage library. Deploys on every push (`.github/workflows/deploy.yml`).
 
 **Optional cloud accounts (parent area):** create a Supabase project, set
 `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY` (locally in
@@ -65,7 +68,8 @@ cd packages/magic-fill && npm test
 | PWA manifest + offline | ✅ manifest + minimal service worker (Serwist when app moves server-side) |
 | Week 2 — Supabase Auth flow | ✅ parent signup/login + email verification ("email plus" consent) + cloud library sync via RLS |
 | Week 3 — AI pipeline | ✅ providers (Claude stories/review + OpenAI line art), fail-closed safety, mock-tested end-to-end (10 tests); line-art quality gate scores images with the magic-fill engine itself |
-| Week 3 — model bake-off | ✅ ran 2026-07-17: all Claude tiers 3/3 valid+safe (opus $0.085 / sonnet $0.051 / haiku $0.017 per story); all gpt-image models 100% fill-friendly; dall-e-3 retired from the API. Recommended: STORY_MODEL=claude-sonnet-5, ILLUSTRATION_MODEL=gpt-image-1-mini |
+| Week 3 — model bake-off | ✅ ran 2026-07-17: all Claude tiers 3/3 valid+safe; all gpt-image models 100% fill-friendly; dall-e-3 retired from the API. Pinned: STORY_MODEL=claude-haiku-4-5 ($0.004/story measured), ILLUSTRATION_MODEL=gpt-image-1-mini |
+| AI stories in the app | ✅ `/api/generate` on Vercel (auth-gated, text-only v0; template fallback everywhere else). AI images await a storage phase |
 
 ## The magic-fill engine (why it matters)
 

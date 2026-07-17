@@ -515,7 +515,8 @@ export function lineArtDataUrl(
   page: number,
   withChild = false,
 ): string {
-  const scene = SCENES[setting](page);
+  // AI stories can exceed the 4 authored scenes per setting — cycle them.
+  const scene = SCENES[setting](((page % 4) + 4) % 4);
   const char = g(scene.charX, scene.charY, scene.charScale, CHARACTERS[character]);
   // Child stands canvas-inward from the character; drawn after the scene so
   // its white fill reads as standing in front of fences/hills.
