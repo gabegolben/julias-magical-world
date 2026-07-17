@@ -4,12 +4,20 @@
   "private": true,
   "type": "module",
   "main": "src/index.ts",
+  "scripts": {
+    "test": "node --experimental-strip-types --test test/pipeline.test.ts",
+    "typecheck": "tsc --noEmit",
+    "bakeoff": "node --experimental-strip-types scripts/bakeoff.mjs"
+  },
   "dependencies": {
-    "zod": "^3.23.0",
+    "@anthropic-ai/sdk": "^0.112.1",
+    "@jmw/magic-fill": "*",
     "inngest": "^3.22.0",
-    "openai": "^4.60.0"
+    "openai": "^4.60.0",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
+    "pngjs": "^7.0.0",
     "typescript": "^5.5.0"
   }
 }

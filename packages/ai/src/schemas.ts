@@ -1,4 +1,5 @@
-import { z } from "zod";
+// zod/v4: the API surface the Anthropic SDK's zodOutputFormat helper expects.
+import { z } from "zod/v4";
 
 /**
  * The structured story contract. The LLM must return exactly this shape;

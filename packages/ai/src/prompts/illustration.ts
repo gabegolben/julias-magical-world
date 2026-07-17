@@ -1,4 +1,4 @@
-import type { StoryRequest } from "../schemas.js";
+import type { StoryRequest } from "../schemas.ts";
 
 /** Style suffixes appended to every illustration prompt (Decision #2). */
 const STYLE_SUFFIX = {
@@ -29,6 +29,7 @@ export const LINE_ART_QUALITY = {
   minLineRatio: 0.02,
   maxLineRatio: 0.45,
   // After dilation r=2, probe a grid of interior seeds: at least 80% of
-  // probes must produce contained fills (no border leaks).
+  // probes must produce contained fills (fill covers <= 60% of the canvas —
+  // a page-wide flood means broken outlines).
   minContainedProbeRatio: 0.8,
 } as const;

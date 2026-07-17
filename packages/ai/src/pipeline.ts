@@ -9,17 +9,23 @@
  */
 
 import { Inngest } from "inngest";
-import { GeneratedStorySchema, type StoryRequest } from "./schemas.js";
-import { buildStorySystemPrompt, buildStoryUserPrompt } from "./prompts/story.js";
-import { buildIllustrationPrompt } from "./prompts/illustration.js";
-import { screenStoryText } from "./safety.js";
+import { type StoryRequest } from "./schemas.ts";
+import { buildIllustrationPrompt } from "./prompts/illustration.ts";
+import { screenStoryText } from "./safety.ts";
+import { anthropicStoryModel } from "./providers/anthropic.ts";
+import { openaiImageModel } from "./providers/openaiImage.ts";
 
 export const inngest = new Inngest({ id: "julias-magical-world" });
 
+/**
+ * Provider defaults; pin bake-off winners via env (STORY_MODEL /
+ * ILLUSTRATION_MODEL / REVIEW_MODEL). Run scripts/bakeoff.mjs to compare
+ * candidates on schema validity, safety, cost, and fill-friendliness.
+ */
 export const MODELS = {
-  story: process.env.STORY_MODEL ?? "PIN_AFTER_BAKEOFF",
-  illustration: process.env.ILLUSTRATION_MODEL ?? "PIN_AFTER_BAKEOFF",
-  review: process.env.REVIEW_MODEL ?? "PIN_AFTER_BAKEOFF",
+  story: process.env.STORY_MODEL ?? "claude-opus-4-8",
+  illustration: process.env.ILLUSTRATION_MODEL ?? "gpt-image-1",
+  review: process.env.REVIEW_MODEL ?? "claude-opus-4-8",
 } as const;
 
 export const generateStory = inngest.createFunction(
@@ -28,11 +34,10 @@ export const generateStory = inngest.createFunction(
   async ({ event, step }) => {
     const req = event.data as StoryRequest & { storyId: string };
 
-    // 1. Story text (structured JSON, zod-validated — invalid output retries)
-    const story = await step.run("llm-story", async () => {
-      const raw = await callStoryModel(buildStorySystemPrompt(req), buildStoryUserPrompt(req));
-      return GeneratedStorySchema.parse(JSON.parse(raw));
-    });
+    // 1. Story text (structured outputs, zod-validated — invalid output retries)
+    const story = await step.run("llm-story", async () =>
+      anthropicStoryModel({ model: MODELS.story }).generate(req),
+    );
 
     // 2. Text safety screen — fail CLOSED into human review
     const screen = screenStoryText(story.pages.map((p) => p.text).join("\n"));
@@ -76,12 +81,10 @@ export const generateIllustration = inngest.createFunction(
   },
 );
 
-// ---- Provider adapters: implement against bake-off winners ----------------
-async function callStoryModel(system: string, user: string): Promise<string> {
-  throw new Error("Wire to story model after Week 3 bake-off");
-}
+// ---- Provider adapters -----------------------------------------------------
 async function callImageModel(prompt: string): Promise<string> {
-  throw new Error("Wire to image model after Week 3 bake-off");
+  const image = await openaiImageModel({ model: MODELS.illustration }).generateLineArt(prompt);
+  return `data:image/png;base64,${image.pngBase64}`;
 }
 async function persistStoryText(storyId: string, story: unknown): Promise<void> {
   throw new Error("Wire to Prisma");

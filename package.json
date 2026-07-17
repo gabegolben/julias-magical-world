@@ -9,8 +9,8 @@
   "scripts": {
     "dev": "npm run dev -w @jmw/web",
     "build": "npm run build -w @jmw/web",
-    "test": "npm run test -w @jmw/magic-fill",
-    "typecheck": "npm run typecheck -w @jmw/web"
+    "test": "npm run test -w @jmw/magic-fill && npm run test -w @jmw/ai",
+    "typecheck": "npm run typecheck -w @jmw/web && npm run typecheck -w @jmw/ai"
   },
   "engines": {
     "node": ">=22"

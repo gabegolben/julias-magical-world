@@ -64,7 +64,8 @@ cd packages/magic-fill && npm test
 | Public shareable build | ✅ static export → GitHub Pages on every push to `main` |
 | PWA manifest + offline | ✅ manifest + minimal service worker (Serwist when app moves server-side) |
 | Week 2 — Supabase Auth flow | ✅ parent signup/login + email verification ("email plus" consent) + cloud library sync via RLS |
-| Week 3 — real AI pipeline wiring (model bake-off) | ⬜ demo uses templates until models are pinned |
+| Week 3 — AI pipeline | ✅ providers (Claude stories/review + OpenAI line art), fail-closed safety, mock-tested end-to-end (10 tests); line-art quality gate scores images with the magic-fill engine itself |
+| Week 3 — model bake-off | 🔶 harness ready (`npm run bakeoff -w @jmw/ai`) — needs ANTHROPIC_API_KEY / OPENAI_API_KEY to run and pin winners |
 
 ## The magic-fill engine (why it matters)
 

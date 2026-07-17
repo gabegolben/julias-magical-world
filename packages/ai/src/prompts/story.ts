@@ -1,4 +1,4 @@
-import type { StoryRequest } from "../schemas.js";
+import type { StoryRequest } from "../schemas.ts";
 
 /**
  * Story generation prompts — age-banded, language-parameterized (Decision #7).
