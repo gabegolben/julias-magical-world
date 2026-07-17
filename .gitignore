@@ -5,3 +5,4 @@ out/
 !.env.example
 *.tsbuildinfo
 bakeoff-results.json
+bakeoff-images/

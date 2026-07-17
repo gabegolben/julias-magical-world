@@ -65,7 +65,7 @@ cd packages/magic-fill && npm test
 | PWA manifest + offline | ✅ manifest + minimal service worker (Serwist when app moves server-side) |
 | Week 2 — Supabase Auth flow | ✅ parent signup/login + email verification ("email plus" consent) + cloud library sync via RLS |
 | Week 3 — AI pipeline | ✅ providers (Claude stories/review + OpenAI line art), fail-closed safety, mock-tested end-to-end (10 tests); line-art quality gate scores images with the magic-fill engine itself |
-| Week 3 — model bake-off | 🔶 harness ready (`npm run bakeoff -w @jmw/ai`) — needs ANTHROPIC_API_KEY / OPENAI_API_KEY to run and pin winners |
+| Week 3 — model bake-off | ✅ ran 2026-07-17: all Claude tiers 3/3 valid+safe (opus $0.085 / sonnet $0.051 / haiku $0.017 per story); all gpt-image models 100% fill-friendly; dall-e-3 retired from the API. Recommended: STORY_MODEL=claude-sonnet-5, ILLUSTRATION_MODEL=gpt-image-1-mini |
 
 ## The magic-fill engine (why it matters)
 

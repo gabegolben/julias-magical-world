@@ -17,7 +17,7 @@
  *   ratio + fill-containment probe ratio, i.e. "will tap-to-fill work on it".
  */
 
-import { writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { anthropicStoryModel } from "../src/providers/anthropic.ts";
 import { openaiImageModel } from "../src/providers/openaiImage.ts";
 import { buildIllustrationPrompt } from "../src/prompts/illustration.ts";
@@ -33,7 +33,9 @@ function listArg(flag, fallback) {
   return values;
 }
 const STORY_MODELS = listArg("--story-models", ["claude-opus-4-8", "claude-sonnet-5", "claude-haiku-4-5"]);
-const IMAGE_MODELS = listArg("--image-models", ["gpt-image-1", "dall-e-3"]);
+const IMAGE_MODELS = listArg("--image-models", ["gpt-image-1", "gpt-image-2", "gpt-image-1-mini"]);
+// --image-prompts N limits how many prompts run per image model (cost control).
+const IMAGE_PROMPT_LIMIT = Number(listArg("--image-prompts", ["3"])[0]) || 3;
 
 // $/MTok (input, output) — verify against current pricing before deciding.
 const PRICING = {
@@ -102,12 +104,14 @@ async function imageBakeoff() {
   for (const model of IMAGE_MODELS) {
     const provider = openaiImageModel({ model });
     const row = { model, attempts: 0, passed: 0, avgContained: 0, avgLineRatio: 0, totalMs: 0, errors: [] };
-    for (const prompt of IMAGE_PROMPTS) {
+    for (const prompt of IMAGE_PROMPTS.slice(0, IMAGE_PROMPT_LIMIT)) {
       row.attempts += 1;
       const t0 = Date.now();
       try {
         const image = await provider.generateLineArt(prompt);
         row.totalMs += Date.now() - t0;
+        mkdirSync("bakeoff-images", { recursive: true });
+        writeFileSync(`bakeoff-images/${model.replaceAll(".", "_")}-${row.attempts}.png`, Buffer.from(image.pngBase64, "base64"));
         const png = PNG.sync.read(Buffer.from(image.pngBase64, "base64"));
         const assessment = assessLineArt(new Uint8ClampedArray(png.data), png.width, png.height);
         row.avgContained += assessment.containedProbeRatio;

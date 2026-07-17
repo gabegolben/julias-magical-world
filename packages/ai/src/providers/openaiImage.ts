@@ -21,17 +21,22 @@ export function openaiImageModel(opts: OpenAIImageOptions = {}): ImageModel {
   return {
     name: `openai:${model}`,
     async generateLineArt(prompt: string): Promise<GeneratedImage> {
+      // No response_format: the current API rejects it; models return either
+      // base64 (gpt-image-*) or a short-lived URL (dall-e-*) — handle both.
       const response = await client.images.generate({
         model,
         prompt,
         size: "1024x1024",
         n: 1,
-        // dall-e-* defaults to URLs; gpt-image-* is base64-only and rejects the param.
-        ...(model.startsWith("dall-e") ? { response_format: "b64_json" as const } : {}),
       });
-      const b64 = response.data?.[0]?.b64_json;
-      if (!b64) throw new Error(`Image model ${model} returned no base64 payload`);
-      return { pngBase64: b64 };
+      const item = response.data?.[0];
+      if (item?.b64_json) return { pngBase64: item.b64_json };
+      if (item?.url) {
+        const download = await fetch(item.url);
+        if (!download.ok) throw new Error(`Image download failed: HTTP ${download.status}`);
+        return { pngBase64: Buffer.from(await download.arrayBuffer()).toString("base64") };
+      }
+      throw new Error(`Image model ${model} returned no image payload`);
     },
   };
 }
