@@ -7,7 +7,7 @@
   "scripts": {
     "test": "node --experimental-strip-types --test test/pipeline.test.ts",
     "typecheck": "tsc --noEmit",
-    "bakeoff": "node --experimental-strip-types scripts/bakeoff.mjs"
+    "bakeoff": "node --experimental-strip-types --env-file-if-exists=../../.env --env-file-if-exists=.env scripts/bakeoff.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.112.1",
