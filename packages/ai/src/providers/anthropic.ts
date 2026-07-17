@@ -14,6 +14,10 @@ import type { StoryModel, StoryReviewer } from "./types.ts";
 
 const DEFAULT_STORY_MODEL = "claude-opus-4-8";
 
+/** Adaptive thinking arrived with the 4.6 family; older tiers 400 on it. */
+const supportsAdaptiveThinking = (model: string) =>
+  !/haiku-4-5|sonnet-4-5|opus-4-[0-5]|claude-3/.test(model);
+
 export interface AnthropicOptions {
   model?: string;
   client?: Anthropic;
@@ -28,7 +32,7 @@ export function anthropicStoryModel(opts: AnthropicOptions = {}): StoryModel {
       const response = await client.messages.parse({
         model,
         max_tokens: 16000,
-        thinking: { type: "adaptive" },
+        ...(supportsAdaptiveThinking(model) ? { thinking: { type: "adaptive" as const } } : {}),
         system: buildStorySystemPrompt(req),
         messages: [{ role: "user", content: buildStoryUserPrompt(req) }],
         output_config: { format: zodOutputFormat(GeneratedStorySchema) },

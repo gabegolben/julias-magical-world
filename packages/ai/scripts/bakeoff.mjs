@@ -24,8 +24,16 @@ import { buildIllustrationPrompt } from "../src/prompts/illustration.ts";
 import { screenStoryText } from "../src/safety.ts";
 import { assessLineArt } from "../src/quality.ts";
 
-const STORY_MODELS = ["claude-opus-4-8", "claude-sonnet-5", "claude-haiku-4-5"];
-const IMAGE_MODELS = ["gpt-image-1", "dall-e-3"];
+// Filter candidates to avoid re-spending on models already measured:
+//   --story-models claude-haiku-4-5   --image-models none
+function listArg(flag, fallback) {
+  const i = process.argv.indexOf(flag);
+  if (i === -1 || !process.argv[i + 1]) return fallback;
+  const values = process.argv[i + 1].split(",").filter((v) => v && v !== "none");
+  return values;
+}
+const STORY_MODELS = listArg("--story-models", ["claude-opus-4-8", "claude-sonnet-5", "claude-haiku-4-5"]);
+const IMAGE_MODELS = listArg("--image-models", ["gpt-image-1", "dall-e-3"]);
 
 // $/MTok (input, output) — verify against current pricing before deciding.
 const PRICING = {
