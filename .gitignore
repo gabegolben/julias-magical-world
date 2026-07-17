@@ -6,3 +6,4 @@ out/
 *.tsbuildinfo
 bakeoff-results.json
 bakeoff-images/
+story-compare.json
