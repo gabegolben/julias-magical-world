@@ -7,6 +7,13 @@ import type { CharacterKey, SettingKey } from "./stories";
  * error, safety hold — and the caller falls back to the template engine.
  * The child always gets a story.
  */
+function fallback(reason: string): null {
+  // Visible in the browser console — the fast way to see why a story came
+  // from templates instead of the AI service.
+  console.info(`[jmw] template fallback: ${reason}`);
+  return null;
+}
+
 export async function generateAiStory(params: {
   characterKey: CharacterKey;
   settingKey: SettingKey;
@@ -15,9 +22,9 @@ export async function generateAiStory(params: {
 }): Promise<{ title: string; pagesText: string[] } | null> {
   try {
     const supabase = getSupabase();
-    if (!supabase) return null;
+    if (!supabase) return fallback("supabase not configured in this build");
     const { data } = await supabase.auth.getSession();
-    if (!data.session) return null;
+    if (!data.session) return fallback("no parent signed in on this device/domain");
 
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 90_000);
@@ -37,14 +44,14 @@ export async function generateAiStory(params: {
     });
     clearTimeout(timer);
 
-    if (!response.ok) return null;
+    if (!response.ok) return fallback(`API responded ${response.status}`);
     const json = (await response.json()) as {
       status: string;
       story?: { title: string; pages: { text: string }[] };
     };
-    if (json.status !== "READY" || !json.story) return null;
+    if (json.status !== "READY" || !json.story) return fallback(`status ${json.status}`);
     return { title: json.story.title, pagesText: json.story.pages.map((p) => p.text) };
-  } catch {
-    return null; // offline / static build / abort — template fallback
+  } catch (err) {
+    return fallback(`request failed (offline/static/timeout): ${String(err)}`);
   }
 }

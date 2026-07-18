@@ -39,6 +39,17 @@ function storyModelFor(tier: "free" | "premium"): string {
   return process.env.STORY_MODEL ?? "claude-haiku-4-5";
 }
 
+/** Health check: reports config PRESENCE only (never values). */
+export function GET(): Response {
+  return Response.json({
+    ok: true,
+    anthropicKey: Boolean(process.env.ANTHROPIC_API_KEY),
+    supabaseUrl: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL),
+    supabaseAnonKey: Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
+    storyModel: process.env.STORY_MODEL ?? "claude-haiku-4-5 (default)",
+  });
+}
+
 export async function POST(request: Request): Promise<Response> {
   // 1. Auth: a verified parent account is the gate on AI spend.
   const token = request.headers.get("authorization")?.replace(/^Bearer /i, "");
