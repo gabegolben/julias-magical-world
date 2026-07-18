@@ -35,7 +35,9 @@ export async function generateAiStory(params: {
 
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 90_000);
-    const response = await fetch(`${API_BASE}/api/generate`, {
+    // Trailing slash required: trailingSlash:true 308s the bare path, and
+    // browsers reject any redirect on a CORS preflight.
+    const response = await fetch(`${API_BASE}/api/generate/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
