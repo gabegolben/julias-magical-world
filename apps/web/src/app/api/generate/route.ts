@@ -32,21 +32,35 @@ const BodySchema = z.object({
   tier: z.enum(["free", "premium"]).default("free"),
 });
 
-function storyModelFor(tier: "free" | "premium"): string {
-  if (tier === "premium" && process.env.STORY_MODEL_PREMIUM) {
-    return process.env.STORY_MODEL_PREMIUM;
-  }
-  return process.env.STORY_MODEL ?? "claude-haiku-4-5";
+/**
+ * Model envs must be API ids ("claude-haiku-4-5"), but a display name like
+ * "Haiku 4.5" is an easy dashboard mistake that 404s every request. Treat
+ * anything that isn't a plausible id as unset so generation never breaks
+ * on a misconfigured env var.
+ */
+function validModelId(id: string | undefined): string | null {
+  return id && /^claude-[a-z0-9.-]+$/.test(id) ? id : null;
 }
 
-/** Health check: reports config PRESENCE only (never values). */
+function storyModelFor(tier: "free" | "premium"): string {
+  if (tier === "premium") {
+    const premium = validModelId(process.env.STORY_MODEL_PREMIUM);
+    if (premium) return premium;
+  }
+  return validModelId(process.env.STORY_MODEL) ?? "claude-haiku-4-5";
+}
+
+/** Health check: reports config PRESENCE only (never secret values). */
 export function GET(): Response {
   return Response.json({
     ok: true,
     anthropicKey: Boolean(process.env.ANTHROPIC_API_KEY),
     supabaseUrl: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL),
     supabaseAnonKey: Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
-    storyModel: process.env.STORY_MODEL ?? "claude-haiku-4-5 (default)",
+    storyModel: process.env.STORY_MODEL ?? "(unset)",
+    effectiveStoryModel: storyModelFor("free"),
+    reviewModel: process.env.REVIEW_MODEL ?? "(unset)",
+    effectiveReviewModel: validModelId(process.env.REVIEW_MODEL) ?? "claude-opus-4-8 (default)",
   });
 }
 
@@ -81,7 +95,8 @@ export async function POST(request: Request): Promise<Response> {
       },
       {
         story: anthropicStoryModel({ model: storyModelFor(body.tier) }),
-        reviewer: anthropicReviewer(),
+        // Explicit model so a bad REVIEW_MODEL env falls back instead of 404ing.
+        reviewer: anthropicReviewer({ model: validModelId(process.env.REVIEW_MODEL) ?? "claude-opus-4-8" }),
         image: mockImageModel(), // unused: generateImages=false
       },
       { generateImages: false },
