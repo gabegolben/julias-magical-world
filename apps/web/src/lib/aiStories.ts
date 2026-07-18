@@ -7,6 +7,13 @@ import type { CharacterKey, SettingKey } from "./stories";
  * error, safety hold — and the caller falls back to the template engine.
  * The child always gets a story.
  */
+/**
+ * Static builds (GitHub Pages) have no local API — NEXT_PUBLIC_AI_API_URL is
+ * baked in at build time to point at the Vercel deployment (CORS-enabled).
+ * Server builds leave it unset and call the same-origin route.
+ */
+const API_BASE = process.env.NEXT_PUBLIC_AI_API_URL ?? "";
+
 function fallback(reason: string): null {
   // Visible in the browser console — the fast way to see why a story came
   // from templates instead of the AI service.
@@ -28,7 +35,7 @@ export async function generateAiStory(params: {
 
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 90_000);
-    const response = await fetch("/api/generate", {
+    const response = await fetch(`${API_BASE}/api/generate`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -24,6 +24,29 @@ import { z } from "zod/v4";
 
 export const maxDuration = 120;
 
+// Static export (GitHub Pages) prerenders GET and drops POST/OPTIONS; without
+// this the STATIC_EXPORT=1 build fails on this route. Server mode (Vercel)
+// still runs POST dynamically — env is read at build there, which is when
+// Vercel applies env anyway.
+export const dynamic = "force-static";
+
+/**
+ * The GitHub Pages mirror calls this API cross-origin (NEXT_PUBLIC_AI_API_URL
+ * baked into the static build): a parent signed in on the Pages domain holds
+ * a Supabase JWT that is project-scoped, not origin-scoped, so it verifies
+ * here fine — the browser just needs CORS consent for the preflight.
+ */
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "https://gabegolben.github.io",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  "Access-Control-Max-Age": "86400",
+};
+
+export function OPTIONS(): Response {
+  return new Response(null, { status: 204, headers: CORS_HEADERS });
+}
+
 const BodySchema = z.object({
   characterKey: z.enum(["unicorn", "dinosaur", "princess", "robot", "puppy"]),
   settingKey: z.enum(["beach", "forest", "castle", "space", "farm"]),
@@ -64,21 +87,25 @@ export function GET(): Response {
   });
 }
 
+function json(body: unknown, status = 200): Response {
+  return Response.json(body, { status, headers: CORS_HEADERS });
+}
+
 export async function POST(request: Request): Promise<Response> {
   // 1. Auth: a verified parent account is the gate on AI spend.
   const token = request.headers.get("authorization")?.replace(/^Bearer /i, "");
-  if (!token) return Response.json({ error: "auth required" }, { status: 401 });
+  if (!token) return json({ error: "auth required" }, 401);
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   );
   const { data, error } = await supabase.auth.getUser(token);
-  if (error || !data.user) return Response.json({ error: "auth required" }, { status: 401 });
+  if (error || !data.user) return json({ error: "auth required" }, 401);
 
   // 2. Validate template-only input.
   const parsed = BodySchema.safeParse(await request.json().catch(() => null));
-  if (!parsed.success) return Response.json({ error: "invalid request" }, { status: 400 });
+  if (!parsed.success) return json({ error: "invalid request" }, 400);
   const body = parsed.data;
 
   // 3. Run the pipeline (text only; fail-closed safety inside).
@@ -104,9 +131,9 @@ export async function POST(request: Request): Promise<Response> {
 
     if (result.status !== "READY") {
       // Held for review — the client falls back to a template story.
-      return Response.json({ status: "SAFETY_REVIEW" }, { status: 200 });
+      return json({ status: "SAFETY_REVIEW" });
     }
-    return Response.json({
+    return json({
       status: "READY",
       story: {
         title: result.story.title,
@@ -115,6 +142,6 @@ export async function POST(request: Request): Promise<Response> {
     });
   } catch (err) {
     console.error("generate failed:", err);
-    return Response.json({ error: "generation failed" }, { status: 502 });
+    return json({ error: "generation failed" }, 502);
   }
 }
