@@ -127,21 +127,21 @@ function cacheWriter(): SupabaseClient | null {
   });
 }
 
-/** Look up a reusable story by cache key (read via the user's RLS-scoped client). */
-async function readCache(db: SupabaseClient, cacheKey: string): Promise<StoryOut | null> {
+/** All cached variants for a combination (read via the user's RLS-scoped client). */
+async function readCacheVariants(db: SupabaseClient, cacheKey: string): Promise<StoryOut[]> {
   const { data, error } = await db
     .from("story_cache")
     .select("title, pages")
     .eq("cache_key", cacheKey)
-    .maybeSingle();
+    .limit(STORY_CACHE_VARIANTS);
   if (error) {
-    console.warn("story_cache read failed (run migration 0005?):", error.message);
-    return null;
+    console.warn("story_cache read failed (run migrations 0005/0006?):", error.message);
+    return [];
   }
-  return data ? { title: data.title as string, pages: data.pages as StoryPageOut[] } : null;
+  return (data ?? []).map((r) => ({ title: r.title as string, pages: r.pages as StoryPageOut[] }));
 }
 
-/** Seed the shared cache (server-only). Best-effort; first writer wins. */
+/** Add one variant to the shared cache (server-only, best-effort). */
 async function writeCache(cacheKey: string, story: StoryOut, name: string | undefined): Promise<void> {
   const sr = cacheWriter();
   if (!sr) return; // no service role configured — caching disabled, generation already succeeded
@@ -150,7 +150,7 @@ async function writeCache(cacheKey: string, story: StoryOut, name: string | unde
     title: templatize(story.title, name),
     pages: story.pages.map((p) => ({ text: templatize(p.text, name), artUrl: p.artUrl })),
   };
-  const { error } = await sr.from("story_cache").upsert(row, { onConflict: "cache_key", ignoreDuplicates: true });
+  const { error } = await sr.from("story_cache").insert(row);
   if (error) console.warn("story_cache write failed:", error.message);
 }
 
@@ -160,6 +160,11 @@ function dailyLimit(envVar: string | undefined, fallback: number): number {
 }
 const STORY_DAILY_LIMIT = dailyLimit(process.env.STORY_DAILY_LIMIT, 15);
 const IMAGE_DAILY_LIMIT = dailyLimit(process.env.IMAGE_DAILY_LIMIT, 40);
+// How many distinct stories to cache per combination before serving cached
+// ones at random. Each combination generates fresh (and costs) until it holds
+// this many variants; after that, requests are free random picks. 1 = the
+// original single-entry cache.
+const STORY_CACHE_VARIANTS = Math.max(1, dailyLimit(process.env.STORY_CACHE_VARIANTS, 3));
 
 /**
  * Usage in the last 24h from the append-only ledger. Fails OPEN (returns 0)
@@ -266,13 +271,20 @@ export async function POST(request: Request): Promise<Response> {
   if (!parsed.success) return json({ error: "invalid request" }, 400);
   const body = parsed.data;
 
-  // 3. Cache: a prior generation for these same dimensions is reused for free,
-  //    swapping in this child's name. No AI/image spend, no quota consumed —
-  //    the whole point of the shared cache.
+  // 3. Cache: once a combination holds STORY_CACHE_VARIANTS distinct stories,
+  //    serve one at random for free (name swapped in) — no AI/image spend, no
+  //    quota. Below that count we fall through and generate a new variant, so
+  //    each combination accrues variety over its first few requests.
   const cacheKey = cacheKeyFor(body);
-  const cached = await readCache(db, cacheKey);
-  if (cached) {
-    return json({ status: "READY", cached: true, story: detemplatizeStory(cached, body.childName) });
+  const variants = await readCacheVariants(db, cacheKey);
+  if (variants.length >= STORY_CACHE_VARIANTS) {
+    const pick = variants[Math.floor(Math.random() * variants.length)];
+    return json({
+      status: "READY",
+      cached: true,
+      variants: variants.length,
+      story: detemplatizeStory(pick, body.childName),
+    });
   }
 
   // 4. Daily story cap — reserved BEFORE spending, so failed generations
@@ -327,11 +339,12 @@ export async function POST(request: Request): Promise<Response> {
       pages: result.story.pages.map((p, i) => ({ text: p.text, artUrl: artUrls[i] ?? null })),
     };
 
-    // 7. Seed the shared cache (server-only, best-effort) so the next request
-    //    for these dimensions is served for free with the name swapped.
+    // 7. Add this as a new variant (server-only, best-effort) so the
+    //    combination fills toward STORY_CACHE_VARIANTS and future requests are
+    //    served free at random.
     await writeCache(cacheKey, storyOut, body.childName);
 
-    return json({ status: "READY", cached: false, story: storyOut });
+    return json({ status: "READY", cached: false, variants: variants.length + 1, story: storyOut });
   } catch (err) {
     console.error("generate failed:", err);
     return json({ error: "generation failed" }, 502);
