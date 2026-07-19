@@ -55,6 +55,7 @@
   },
   "coloring": {
     "pickColor": "Pick a color",
+    "customColor": "Pick your own color",
     "allDone": "All done!",
     "showParent": "Show a grown-up",
     "undo": "Undo",

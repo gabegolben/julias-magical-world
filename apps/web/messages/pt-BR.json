@@ -55,6 +55,7 @@
   },
   "coloring": {
     "pickColor": "Escolha uma cor",
+    "customColor": "Escolha sua própria cor",
     "allDone": "Pronto!",
     "showParent": "Mostrar para um adulto",
     "undo": "Desfazer",

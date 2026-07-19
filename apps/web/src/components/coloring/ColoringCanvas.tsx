@@ -38,6 +38,10 @@ export function ColoringCanvas({
   const maskRef = useRef<Uint8Array | null>(null);
   const baseImageRef = useRef<ImageData | null>(null);
   const [color, setColor] = useState<string>(PALETTE[5]); // Julia purple first
+  // Last color chosen from the custom picker (null until first use). Kept
+  // distinct from `color` so its swatch keeps showing the chosen hue even
+  // when a preset is active, and re-selecting it is one tap.
+  const [customColor, setCustomColor] = useState<string | null>(null);
   const [ops, setOps] = useState<FillOp[]>(initialOps ?? []);
   const opsRef = useRef(ops);
   opsRef.current = ops;
@@ -143,6 +147,38 @@ export function ColoringCanvas({
             ].join(" ")}
           />
         ))}
+        {/* Custom color: the native picker, styled as a swatch. A rainbow ring
+            invites a first pick; afterwards it shows the chosen hue and, like a
+            preset, one tap re-selects it (the picker opens to change it). */}
+        <label
+          className={[
+            "relative flex h-16 w-16 cursor-pointer items-center justify-center rounded-full border-4",
+            "transition-transform motion-safe:active:scale-90",
+            "focus-within:outline-4 focus-within:outline-ink focus-within:outline-offset-2",
+            customColor && color === customColor ? "scale-110 border-ink" : "border-white shadow-md",
+          ].join(" ")}
+          style={
+            customColor
+              ? { backgroundColor: customColor }
+              : {
+                  backgroundImage:
+                    "conic-gradient(#E4572E,#F3A712,#FFE066,#74C98F,#8AD4F0,#7C4DD8,#F49FBC,#E4572E)",
+                }
+          }
+        >
+          {/* Small emoji cue only before a custom color exists. */}
+          {!customColor && <span aria-hidden className="text-2xl drop-shadow">🎨</span>}
+          <input
+            type="color"
+            value={customColor ?? color}
+            onChange={(e) => {
+              setCustomColor(e.target.value);
+              setColor(e.target.value);
+            }}
+            aria-label={t("customColor")}
+            className="sr-only"
+          />
+        </label>
         <button
           type="button"
           onClick={undo}
