@@ -53,7 +53,10 @@ export async function generateAiStory(params: {
     });
     clearTimeout(timer);
 
-    if (!response.ok) return fallback(`API responded ${response.status}`);
+    if (!response.ok) {
+      const body = await response.text().catch(() => "");
+      return fallback(`API responded ${response.status}: ${body.slice(0, 200)}`);
+    }
     const json = (await response.json()) as {
       status: string;
       story?: { title: string; pages: { text: string }[] };

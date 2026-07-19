@@ -8,6 +8,7 @@ import {
   runStoryPipeline,
 } from "@jmw/ai";
 import { z } from "zod/v4";
+import { reviewModel, storyModelFor } from "../../../lib/modelEnv";
 
 /**
  * Real AI story generation (server mode only — absent from the GitHub Pages
@@ -24,11 +25,10 @@ import { z } from "zod/v4";
 
 export const maxDuration = 120;
 
-// Static export (GitHub Pages) prerenders GET and drops POST/OPTIONS; without
-// this the STATIC_EXPORT=1 build fails on this route. Server mode (Vercel)
-// still runs POST dynamically — env is read at build there, which is when
-// Vercel applies env anyway.
-export const dynamic = "force-static";
+// No GET here and NO `dynamic = "force-static"`: non-GET-only routes are
+// simply dropped from a STATIC_EXPORT build, while force-static would make
+// Next strip request headers (killing Authorization) even for POST in
+// server mode. The GET health check lives in /api/health for this reason.
 
 /**
  * The GitHub Pages mirror calls this API cross-origin (NEXT_PUBLIC_AI_API_URL
@@ -55,38 +55,6 @@ const BodySchema = z.object({
   tier: z.enum(["free", "premium"]).default("free"),
 });
 
-/**
- * Model envs must be API ids ("claude-haiku-4-5"), but a display name like
- * "Haiku 4.5" is an easy dashboard mistake that 404s every request. Treat
- * anything that isn't a plausible id as unset so generation never breaks
- * on a misconfigured env var.
- */
-function validModelId(id: string | undefined): string | null {
-  return id && /^claude-[a-z0-9.-]+$/.test(id) ? id : null;
-}
-
-function storyModelFor(tier: "free" | "premium"): string {
-  if (tier === "premium") {
-    const premium = validModelId(process.env.STORY_MODEL_PREMIUM);
-    if (premium) return premium;
-  }
-  return validModelId(process.env.STORY_MODEL) ?? "claude-haiku-4-5";
-}
-
-/** Health check: reports config PRESENCE only (never secret values). */
-export function GET(): Response {
-  return Response.json({
-    ok: true,
-    anthropicKey: Boolean(process.env.ANTHROPIC_API_KEY),
-    supabaseUrl: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL),
-    supabaseAnonKey: Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
-    storyModel: process.env.STORY_MODEL ?? "(unset)",
-    effectiveStoryModel: storyModelFor("free"),
-    reviewModel: process.env.REVIEW_MODEL ?? "(unset)",
-    effectiveReviewModel: validModelId(process.env.REVIEW_MODEL) ?? "claude-opus-4-8 (default)",
-  });
-}
-
 function json(body: unknown, status = 200): Response {
   return Response.json(body, { status, headers: CORS_HEADERS });
 }
@@ -94,14 +62,19 @@ function json(body: unknown, status = 200): Response {
 export async function POST(request: Request): Promise<Response> {
   // 1. Auth: a verified parent account is the gate on AI spend.
   const token = request.headers.get("authorization")?.replace(/^Bearer /i, "");
-  if (!token) return json({ error: "auth required" }, 401);
+  if (!token) return json({ error: "auth required", reason: "no bearer token" }, 401);
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   );
   const { data, error } = await supabase.auth.getUser(token);
-  if (error || !data.user) return json({ error: "auth required" }, 401);
+  if (error || !data.user) {
+    // Reason is Supabase's own validation message ("token is expired", …) —
+    // it describes the token, never contains it, and is what the client
+    // console needs to make a 401 diagnosable from the browser.
+    return json({ error: "auth required", reason: error?.message ?? "no user for token" }, 401);
+  }
 
   // 2. Validate template-only input.
   const parsed = BodySchema.safeParse(await request.json().catch(() => null));
@@ -123,7 +96,7 @@ export async function POST(request: Request): Promise<Response> {
       {
         story: anthropicStoryModel({ model: storyModelFor(body.tier) }),
         // Explicit model so a bad REVIEW_MODEL env falls back instead of 404ing.
-        reviewer: anthropicReviewer({ model: validModelId(process.env.REVIEW_MODEL) ?? "claude-opus-4-8" }),
+        reviewer: anthropicReviewer({ model: reviewModel() }),
         image: mockImageModel(), // unused: generateImages=false
       },
       { generateImages: false },
