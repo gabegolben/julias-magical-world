@@ -14,15 +14,23 @@ const SETTINGS = SETTING_KEYS.map((key) => ({ key, emoji: SETTING_EMOJI[key] }))
  * input (safety-by-construction); the optional name field on the final
  * step is visually framed as a grown-up extra, first name only.
  */
+type Gender = "boy" | "girl";
+
 export function StoryBuilder({
   onCreate,
 }: {
-  onCreate: (characterKey: string, settingKey: string, childName: string) => void;
+  onCreate: (
+    characterKey: string,
+    settingKey: string,
+    childName: string,
+    childGender?: Gender,
+  ) => void;
 }) {
   const t = useTranslations("create");
   const [character, setCharacter] = useState<string | null>(null);
   const [setting, setSetting] = useState<string | null>(null);
   const [childName, setChildName] = useState("");
+  const [gender, setGender] = useState<Gender | null>(null);
 
   const step: "friend" | "place" | "ready" = !character ? "friend" : !setting ? "place" : "ready";
 
@@ -51,24 +59,55 @@ export function StoryBuilder({
       )}
 
       {step === "ready" && (
-        <label className="flex flex-col items-center gap-2 font-body text-sm text-ink/60">
-          {t("childNameLabel")}
-          <input
-            type="text"
-            value={childName}
-            onChange={(e) => setChildName(e.target.value)}
-            placeholder={t("childNamePlaceholder")}
-            maxLength={20}
-            autoComplete="off"
-            className="rounded-wobble border-4 border-ink/20 bg-white px-4 py-2 text-center font-display text-xl text-ink outline-none focus:border-julia"
-          />
-        </label>
+        <div className="flex flex-col items-center gap-4">
+          <label className="flex flex-col items-center gap-2 font-body text-sm text-ink/60">
+            {t("childNameLabel")}
+            <input
+              type="text"
+              value={childName}
+              onChange={(e) => setChildName(e.target.value)}
+              placeholder={t("childNamePlaceholder")}
+              maxLength={20}
+              autoComplete="off"
+              className="rounded-wobble border-4 border-ink/20 bg-white px-4 py-2 text-center font-display text-xl text-ink outline-none focus:border-julia"
+            />
+          </label>
+
+          {/* Optional boy/girl — tap again to clear (stays optional). */}
+          <div
+            role="radiogroup"
+            aria-label={t("childGenderLabel")}
+            className="flex flex-col items-center gap-2 font-body text-sm text-ink/60"
+          >
+            {t("childGenderLabel")}
+            <div className="flex gap-3">
+              {(["boy", "girl"] as const).map((g) => (
+                <button
+                  key={g}
+                  type="button"
+                  role="radio"
+                  aria-checked={gender === g}
+                  onClick={() => setGender((cur) => (cur === g ? null : g))}
+                  className={[
+                    "min-h-tap rounded-wobble border-4 px-6 py-2 font-display text-xl transition-transform",
+                    "focus-visible:outline-4 focus-visible:outline-julia focus-visible:outline-offset-2",
+                    gender === g
+                      ? "border-ink bg-julia text-white"
+                      : "border-ink/20 bg-white text-ink",
+                  ].join(" ")}
+                >
+                  {g === "boy" ? `👦 ${t("genderBoy")}` : `👧 ${t("genderGirl")}`}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
       )}
 
       {step === "ready" && character && setting && (
         <button
           type="button"
-          onClick={() => onCreate(character, setting, childName)}
+          onClick={() => onCreate(character, setting, childName, gender ?? undefined)}
           className="min-h-tap rounded-wobble border-4 border-ink bg-sunshine px-10 font-display text-3xl text-ink shadow-[0_8px_0_#37305A] transition-transform motion-safe:active:translate-y-1 motion-safe:active:shadow-[0_4px_0_#37305A] focus-visible:outline-4 focus-visible:outline-julia focus-visible:outline-offset-4"
         >
           ✨ {t("makeMagic")}

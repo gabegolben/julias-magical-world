@@ -13,6 +13,9 @@
     "makeMagic": "Make magic!",
     "childNameLabel": "Grown-up corner: add your child's name (optional)",
     "childNamePlaceholder": "First name",
+    "childGenderLabel": "Child (optional)",
+    "genderBoy": "Boy",
+    "genderGirl": "Girl",
     "characters": {
       "unicorn": "Unicorn",
       "dinosaur": "Dinosaur",

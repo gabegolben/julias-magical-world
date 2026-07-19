@@ -56,11 +56,102 @@ const BodySchema = z.object({
   settingKey: z.enum(["beach", "forest", "castle", "space", "farm"]),
   language: LanguageSchema,
   childName: z.string().max(30).regex(/^[\p{L} \-']*$/u).optional(),
+  childGender: z.enum(["boy", "girl"]).optional(),
   tier: z.enum(["free", "premium"]).default("free"),
 });
 
+// v0 fixes these; they still key the cache so a future age/style expansion
+// can't collide with entries generated under the old defaults.
+const AGE_BAND = "EARLY_EXPLORER" as const;
+const STYLE = "CARTOON_BOLD" as const;
+
+/** One page as stored/returned: text + optional AI art URL. */
+interface StoryPageOut {
+  text: string;
+  artUrl: string | null;
+}
+interface StoryOut {
+  title: string;
+  pages: StoryPageOut[];
+}
+
 function json(body: unknown, status = 200): Response {
   return Response.json(body, { status, headers: CORS_HEADERS });
+}
+
+const NAME_TOKEN = "{{name}}";
+const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/** Replace the generated name with the {{name}} token for name-independent storage. */
+function templatize(text: string, name: string | undefined): string {
+  if (!name) return text;
+  return text.replace(new RegExp(`\\b${escapeRegExp(name)}\\b`, "g"), NAME_TOKEN);
+}
+
+/** Swap the requester's name back into a cached (templatized) story. */
+function detemplatizeStory(story: StoryOut, name: string | undefined): StoryOut {
+  const swap = (s: string) => (name ? s.split(NAME_TOKEN).join(name) : s);
+  return { title: swap(story.title), pages: story.pages.map((p) => ({ text: swap(p.text), artUrl: p.artUrl })) };
+}
+
+/**
+ * Cache key = everything that shapes the story EXCEPT the name, plus whether a
+ * name was used at all (named stories cast the child as hero with a child
+ * figure in the art; anonymous ones cast the character as hero — different
+ * text AND different illustrations, so they must not share an entry).
+ */
+function cacheKeyFor(body: z.infer<typeof BodySchema>): string {
+  return [
+    AGE_BAND,
+    STYLE,
+    body.tier, // premium may use a better image model later — never share entries across tiers
+    body.language,
+    body.characterKey,
+    body.settingKey,
+    body.childGender ?? "none",
+    body.childName ? "named" : "anon",
+  ].join("|");
+}
+
+/**
+ * Service-role client for the ONE privileged operation: seeding the shared
+ * cache. Kept separate from the user-scoped `db` so client JWTs can never
+ * write re-served content. Returns null when the key isn't configured — the
+ * cache then simply never fills and every request generates fresh.
+ */
+function cacheWriter(): SupabaseClient | null {
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!key) return null;
+  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+}
+
+/** Look up a reusable story by cache key (read via the user's RLS-scoped client). */
+async function readCache(db: SupabaseClient, cacheKey: string): Promise<StoryOut | null> {
+  const { data, error } = await db
+    .from("story_cache")
+    .select("title, pages")
+    .eq("cache_key", cacheKey)
+    .maybeSingle();
+  if (error) {
+    console.warn("story_cache read failed (run migration 0005?):", error.message);
+    return null;
+  }
+  return data ? { title: data.title as string, pages: data.pages as StoryPageOut[] } : null;
+}
+
+/** Seed the shared cache (server-only). Best-effort; first writer wins. */
+async function writeCache(cacheKey: string, story: StoryOut, name: string | undefined): Promise<void> {
+  const sr = cacheWriter();
+  if (!sr) return; // no service role configured — caching disabled, generation already succeeded
+  const row = {
+    cache_key: cacheKey,
+    title: templatize(story.title, name),
+    pages: story.pages.map((p) => ({ text: templatize(p.text, name), artUrl: p.artUrl })),
+  };
+  const { error } = await sr.from("story_cache").upsert(row, { onConflict: "cache_key", ignoreDuplicates: true });
+  if (error) console.warn("story_cache write failed:", error.message);
 }
 
 function dailyLimit(envVar: string | undefined, fallback: number): number {
@@ -175,24 +266,34 @@ export async function POST(request: Request): Promise<Response> {
   if (!parsed.success) return json({ error: "invalid request" }, 400);
   const body = parsed.data;
 
-  // 3. Daily story cap — reserved BEFORE spending, so failed generations
+  // 3. Cache: a prior generation for these same dimensions is reused for free,
+  //    swapping in this child's name. No AI/image spend, no quota consumed —
+  //    the whole point of the shared cache.
+  const cacheKey = cacheKeyFor(body);
+  const cached = await readCache(db, cacheKey);
+  if (cached) {
+    return json({ status: "READY", cached: true, story: detemplatizeStory(cached, body.childName) });
+  }
+
+  // 4. Daily story cap — reserved BEFORE spending, so failed generations
   //    still count and a crash loop can't burn the budget.
   if ((await usedToday(db, "story")) >= STORY_DAILY_LIMIT) {
     return json({ error: "rate limited", reason: "daily story limit reached" }, 429);
   }
   await recordUsage(db, "story");
 
-  // 4. Story text (fail-closed safety inside).
+  // 5. Story text (fail-closed safety inside).
   try {
     const result = await runStoryPipeline(
       {
         childId: randomUUID(), // child profiles arrive with the full schema phase
-        ageBand: "EARLY_EXPLORER",
+        ageBand: AGE_BAND,
         language: body.language,
         characterKey: body.characterKey,
         settingKey: body.settingKey,
-        style: "CARTOON_BOLD",
+        style: STYLE,
         ...(body.childName ? { childName: body.childName } : {}),
+        ...(body.childGender ? { childGender: body.childGender } : {}),
       },
       {
         story: anthropicStoryModel({ model: storyModelFor(body.tier) }),
@@ -208,7 +309,7 @@ export async function POST(request: Request): Promise<Response> {
       return json({ status: "SAFETY_REVIEW" });
     }
 
-    // 5. Illustrations — skipped entirely (procedural art) when the key is
+    // 6. Illustrations — skipped entirely (procedural art) when the key is
     //    absent or the daily image budget is spent. IMAGE_DAILY_LIMIT=0 is
     //    the kill switch.
     let artUrls: (string | null)[] = result.story.pages.map(() => null);
@@ -221,13 +322,16 @@ export async function POST(request: Request): Promise<Response> {
       }
     }
 
-    return json({
-      status: "READY",
-      story: {
-        title: result.story.title,
-        pages: result.story.pages.map((p, i) => ({ text: p.text, artUrl: artUrls[i] ?? null })),
-      },
-    });
+    const storyOut: StoryOut = {
+      title: result.story.title,
+      pages: result.story.pages.map((p, i) => ({ text: p.text, artUrl: artUrls[i] ?? null })),
+    };
+
+    // 7. Seed the shared cache (server-only, best-effort) so the next request
+    //    for these dimensions is served for free with the name swapped.
+    await writeCache(cacheKey, storyOut, body.childName);
+
+    return json({ status: "READY", cached: false, story: storyOut });
   } catch (err) {
     console.error("generate failed:", err);
     return json({ error: "generation failed" }, 502);

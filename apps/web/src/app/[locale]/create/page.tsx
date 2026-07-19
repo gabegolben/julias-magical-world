@@ -20,7 +20,12 @@ export default function CreatePage() {
   const t = useTranslations("generating");
   const [generating, setGenerating] = useState(false);
 
-  async function handleCreate(characterKey: string, settingKey: string, childName: string) {
+  async function handleCreate(
+    characterKey: string,
+    settingKey: string,
+    childName: string,
+    childGender?: "boy" | "girl",
+  ) {
     setGenerating(true);
     const name = sanitizeChildName(childName);
     // Keep the magic moment at least as long as the animation beat.
@@ -30,6 +35,7 @@ export default function CreatePage() {
         settingKey: settingKey as SettingKey,
         language: locale,
         ...(name ? { childName: name } : {}),
+        ...(childGender ? { childGender } : {}),
       }),
       new Promise((resolve) => setTimeout(resolve, 2400)),
     ]);
@@ -38,6 +44,7 @@ export default function CreatePage() {
       settingKey as SettingKey,
       name,
       aiStory ?? undefined,
+      childGender,
     );
     void pushStory(story); // cloud copy when a parent is signed in
     router.push(`/story?id=${story.id}`);

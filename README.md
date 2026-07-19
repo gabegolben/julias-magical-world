@@ -72,6 +72,8 @@ cd packages/magic-fill && npm test
 | AI stories in the app | ✅ `/api/generate` on Vercel (auth-gated; template fallback everywhere else). The Pages mirror calls it cross-origin (CORS) |
 | AI illustrations in the app | ✅ per-page line art (gpt-image-1-mini), gated by the magic-fill engine, stored in Supabase Storage (`story-art` bucket); procedural art fills any page that fails the gate or the daily budget |
 | Per-user rate limiting | ✅ append-only `ai_usage` ledger, daily story/image caps (`STORY_DAILY_LIMIT` / `IMAGE_DAILY_LIMIT` env) |
+| Optional boy/girl | ✅ optional child gender by the name field; refines AI pronouns + the illustrated child |
+| Shared story/art cache | ✅ `story_cache` reuses a prior generation for matching dimensions, swapping the name (`{{name}}` token) — zero AI/image spend on a hit. Server-only writes via `SUPABASE_SERVICE_ROLE_KEY` (clients read-only, can't poison) |
 
 ## The magic-fill engine (why it matters)
 

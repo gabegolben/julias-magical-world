@@ -16,6 +16,8 @@ export function GET(): Response {
     ok: true,
     anthropicKey: Boolean(process.env.ANTHROPIC_API_KEY),
     openaiKey: Boolean(process.env.OPENAI_API_KEY),
+    // Present ⇒ the shared story cache can be seeded (server-only writes).
+    cacheWrites: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
     illustrationModel: process.env.ILLUSTRATION_MODEL ?? "(unset → gpt-image-1)",
     storyDailyLimit: process.env.STORY_DAILY_LIMIT ?? "(unset → 15)",
     imageDailyLimit: process.env.IMAGE_DAILY_LIMIT ?? "(unset → 40)",

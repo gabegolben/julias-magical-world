@@ -55,8 +55,21 @@ export function buildStorySystemPrompt(req: StoryRequest): string {
 }
 
 export function buildStoryUserPrompt(req: StoryRequest): string {
+  const kind = req.childGender === "boy" ? "boy" : req.childGender === "girl" ? "girl" : "child";
   const hero = req.childName?.trim()
-    ? `a child named "${req.childName.trim()}"`
-    : "a brave young child";
-  return `Write a story where ${hero} befriends a ${req.characterKey} and they share an adventure at the ${req.settingKey}. The child is the hero.`;
+    ? `a ${kind} named "${req.childName.trim()}"`
+    : `a brave young ${kind}`;
+  const pronounNote =
+    req.childGender === "boy"
+      ? " Refer to the hero with he/him pronouns."
+      : req.childGender === "girl"
+        ? " Refer to the hero with she/her pronouns."
+        : "";
+  const artNote =
+    req.childGender === "boy"
+      ? " In every illustrationPrompt, depict the hero as a young boy."
+      : req.childGender === "girl"
+        ? " In every illustrationPrompt, depict the hero as a young girl."
+        : "";
+  return `Write a story where ${hero} befriends a ${req.characterKey} and they share an adventure at the ${req.settingKey}. The child is the hero.${pronounNote}${artNote}`;
 }

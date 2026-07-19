@@ -25,6 +25,9 @@ export type AgeBand = z.infer<typeof AgeBandSchema>;
 export const LanguageSchema = z.enum(["en", "pt-BR", "es"]);
 export type Language = z.infer<typeof LanguageSchema>;
 
+export const ChildGenderSchema = z.enum(["boy", "girl"]);
+export type ChildGender = z.infer<typeof ChildGenderSchema>;
+
 /** Template-only input for ages 3-5: no free text = no injection surface. */
 export const StoryRequestSchema = z.object({
   childId: z.string().uuid(),
@@ -34,5 +37,6 @@ export const StoryRequestSchema = z.object({
   settingKey: z.enum(["beach", "forest", "castle", "space", "farm"]),
   style: z.enum(["STORYBOOK_CLASSIC", "CARTOON_BOLD", "WATERCOLOR_SOFT", "MANGA_SKETCH"]),
   childName: z.string().max(30).regex(/^[\p{L} \-']*$/u).optional(), // letters only — parent-entered
+  childGender: ChildGenderSchema.optional(), // optional; refines hero pronouns + illustration
 });
 export type StoryRequest = z.infer<typeof StoryRequestSchema>;

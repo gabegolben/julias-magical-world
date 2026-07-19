@@ -41,6 +41,8 @@ export interface StoryRecord {
   /** Parent-entered first name (Plan Weeks 5-6). When set, the child is the
    *  protagonist and the character becomes their story friend. */
   childName?: string;
+  /** Optional boy/girl — refines AI pronouns + illustration; unset = neutral. */
+  childGender?: "boy" | "girl";
   /** AI-generated stories carry their own text; template stories derive
    *  text from locale files and leave these unset. */
   title?: string;
@@ -96,6 +98,7 @@ export function createStory(
   settingKey: SettingKey,
   childName?: string,
   aiStory?: { title: string; pagesText: string[]; pageArt?: (string | null)[] },
+  childGender?: "boy" | "girl",
 ): StoryRecord {
   const story: StoryRecord = {
     id:
@@ -105,6 +108,7 @@ export function createStory(
     characterKey,
     settingKey,
     ...(childName ? { childName } : {}),
+    ...(childGender ? { childGender } : {}),
     ...(aiStory ? { title: aiStory.title, pagesText: aiStory.pagesText } : {}),
     ...(aiStory?.pageArt?.some(Boolean) ? { pageArt: aiStory.pageArt } : {}),
     createdAt: new Date().toISOString(),

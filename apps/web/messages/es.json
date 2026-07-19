@@ -13,6 +13,9 @@
     "makeMagic": "¡Hacer magia!",
     "childNameLabel": "Rincón de adultos: agrega el nombre de tu peque (opcional)",
     "childNamePlaceholder": "Nombre",
+    "childGenderLabel": "Peque (opcional)",
+    "genderBoy": "Niño",
+    "genderGirl": "Niña",
     "characters": {
       "unicorn": "Unicornio",
       "dinosaur": "Dinosaurio",

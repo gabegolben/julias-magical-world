@@ -26,6 +26,7 @@ export async function generateAiStory(params: {
   settingKey: SettingKey;
   language: string;
   childName?: string;
+  childGender?: "boy" | "girl";
 }): Promise<{ title: string; pagesText: string[]; pageArt: (string | null)[] } | null> {
   try {
     const supabase = getSupabase();
@@ -50,6 +51,7 @@ export async function generateAiStory(params: {
         settingKey: params.settingKey,
         language: params.language,
         ...(params.childName ? { childName: params.childName } : {}),
+        ...(params.childGender ? { childGender: params.childGender } : {}),
       }),
       signal: controller.signal,
     });

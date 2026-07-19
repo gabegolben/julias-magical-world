@@ -13,6 +13,9 @@
     "makeMagic": "Fazer mágica!",
     "childNameLabel": "Cantinho dos adultos: adicione o nome da criança (opcional)",
     "childNamePlaceholder": "Primeiro nome",
+    "childGenderLabel": "Criança (opcional)",
+    "genderBoy": "Menino",
+    "genderGirl": "Menina",
     "characters": {
       "unicorn": "Unicórnio",
       "dinosaur": "Dinossauro",
