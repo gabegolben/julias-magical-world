@@ -69,7 +69,9 @@ cd packages/magic-fill && npm test
 | Week 2 — Supabase Auth flow | ✅ parent signup/login + email verification ("email plus" consent) + cloud library sync via RLS |
 | Week 3 — AI pipeline | ✅ providers (Claude stories/review + OpenAI line art), fail-closed safety, mock-tested end-to-end (10 tests); line-art quality gate scores images with the magic-fill engine itself |
 | Week 3 — model bake-off | ✅ ran 2026-07-17: all Claude tiers 3/3 valid+safe; all gpt-image models 100% fill-friendly; dall-e-3 retired from the API. Pinned: STORY_MODEL=claude-haiku-4-5 ($0.004/story measured), ILLUSTRATION_MODEL=gpt-image-1-mini |
-| AI stories in the app | ✅ `/api/generate` on Vercel (auth-gated, text-only v0; template fallback everywhere else). AI images await a storage phase |
+| AI stories in the app | ✅ `/api/generate` on Vercel (auth-gated; template fallback everywhere else). The Pages mirror calls it cross-origin (CORS) |
+| AI illustrations in the app | ✅ per-page line art (gpt-image-1-mini), gated by the magic-fill engine, stored in Supabase Storage (`story-art` bucket); procedural art fills any page that fails the gate or the daily budget |
+| Per-user rate limiting | ✅ append-only `ai_usage` ledger, daily story/image caps (`STORY_DAILY_LIMIT` / `IMAGE_DAILY_LIMIT` env) |
 
 ## The magic-fill engine (why it matters)
 

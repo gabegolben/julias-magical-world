@@ -114,7 +114,10 @@ function StoryView() {
 
       <ColoringCanvas
         key={`${story.id}:${page}`}
-        lineArtUrl={lineArtDataUrl(story.characterKey, story.settingKey, page, !!story.childName)}
+        lineArtUrl={
+          story.pageArt?.[page] ??
+          lineArtDataUrl(story.characterKey, story.settingKey, page, !!story.childName)
+        }
         initialOps={loadOps(story.id, page)}
         onOpsChange={(ops) => {
           saveOps(story.id, page, ops);

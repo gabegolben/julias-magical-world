@@ -13,6 +13,9 @@ import { loadOps, type StoryRecord } from "./stories";
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
+    // Required to read pixels back (getImageData) from cross-origin AI art on
+    // Supabase Storage; harmless for same-origin/data-URL procedural art.
+    img.crossOrigin = "anonymous";
     img.onload = () => resolve(img);
     img.onerror = reject;
     img.src = src;
@@ -21,7 +24,8 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 
 export async function renderColoredPage(story: StoryRecord, page: number): Promise<string> {
   const img = await loadImage(
-    lineArtDataUrl(story.characterKey, story.settingKey, page, !!story.childName),
+    story.pageArt?.[page] ??
+      lineArtDataUrl(story.characterKey, story.settingKey, page, !!story.childName),
   );
   const canvas = document.createElement("canvas");
   canvas.width = img.naturalWidth;

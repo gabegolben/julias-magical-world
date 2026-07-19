@@ -26,7 +26,7 @@ export async function generateAiStory(params: {
   settingKey: SettingKey;
   language: string;
   childName?: string;
-}): Promise<{ title: string; pagesText: string[] } | null> {
+}): Promise<{ title: string; pagesText: string[]; pageArt: (string | null)[] } | null> {
   try {
     const supabase = getSupabase();
     if (!supabase) return fallback("supabase not configured in this build");
@@ -34,7 +34,9 @@ export async function generateAiStory(params: {
     if (!data.session) return fallback("no parent signed in on this device/domain");
 
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 90_000);
+    // Generous: story + per-page image generation with a retry can take a
+    // while. Stays under the route's maxDuration (120s) with headroom.
+    const timer = setTimeout(() => controller.abort(), 115_000);
     // Trailing slash required: trailingSlash:true 308s the bare path, and
     // browsers reject any redirect on a CORS preflight.
     const response = await fetch(`${API_BASE}/api/generate/`, {
@@ -59,10 +61,14 @@ export async function generateAiStory(params: {
     }
     const json = (await response.json()) as {
       status: string;
-      story?: { title: string; pages: { text: string }[] };
+      story?: { title: string; pages: { text: string; artUrl?: string | null }[] };
     };
     if (json.status !== "READY" || !json.story) return fallback(`status ${json.status}`);
-    return { title: json.story.title, pagesText: json.story.pages.map((p) => p.text) };
+    return {
+      title: json.story.title,
+      pagesText: json.story.pages.map((p) => p.text),
+      pageArt: json.story.pages.map((p) => p.artUrl ?? null),
+    };
   } catch (err) {
     return fallback(`request failed (offline/static/timeout): ${String(err)}`);
   }

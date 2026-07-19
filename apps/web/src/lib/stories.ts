@@ -45,6 +45,10 @@ export interface StoryRecord {
    *  text from locale files and leave these unset. */
   title?: string;
   pagesText?: string[];
+  /** AI line-art URLs, index-aligned with pagesText. A null/missing entry
+   *  means that page uses procedural art (bad quality gate, budget spent, or
+   *  no image key) — the child always gets a colorable page either way. */
+  pageArt?: (string | null)[];
   createdAt: string; // ISO
 }
 
@@ -91,7 +95,7 @@ export function createStory(
   characterKey: CharacterKey,
   settingKey: SettingKey,
   childName?: string,
-  aiStory?: { title: string; pagesText: string[] },
+  aiStory?: { title: string; pagesText: string[]; pageArt?: (string | null)[] },
 ): StoryRecord {
   const story: StoryRecord = {
     id:
@@ -102,6 +106,7 @@ export function createStory(
     settingKey,
     ...(childName ? { childName } : {}),
     ...(aiStory ? { title: aiStory.title, pagesText: aiStory.pagesText } : {}),
+    ...(aiStory?.pageArt?.some(Boolean) ? { pageArt: aiStory.pageArt } : {}),
     createdAt: new Date().toISOString(),
   };
   const all = listStories();

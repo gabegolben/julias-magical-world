@@ -15,6 +15,10 @@ export function GET(): Response {
   return Response.json({
     ok: true,
     anthropicKey: Boolean(process.env.ANTHROPIC_API_KEY),
+    openaiKey: Boolean(process.env.OPENAI_API_KEY),
+    illustrationModel: process.env.ILLUSTRATION_MODEL ?? "(unset → gpt-image-1)",
+    storyDailyLimit: process.env.STORY_DAILY_LIMIT ?? "(unset → 15)",
+    imageDailyLimit: process.env.IMAGE_DAILY_LIMIT ?? "(unset → 40)",
     supabaseUrl: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL),
     supabaseAnonKey: Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
     storyModel: process.env.STORY_MODEL ?? "(unset)",

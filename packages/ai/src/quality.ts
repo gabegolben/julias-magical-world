@@ -8,6 +8,7 @@
 
 // Direct .ts imports: this package runs under node --experimental-strip-types,
 // which does not rewrite the package's .js specifiers (webpack does, for the app).
+import { PNG } from "pngjs";
 import { buildLineMask, dilateMask, magicFillMasked } from "../../magic-fill/src/gapClosing.ts";
 import { LINE_ART_QUALITY } from "./prompts/illustration.ts";
 
@@ -64,4 +65,10 @@ export function assessLineArt(
   }
 
   return { ok: reasons.length === 0, lineRatio, containedProbeRatio, probes, reasons };
+}
+
+/** Decode a base64 PNG (what the image providers return) and assess it. */
+export function assessPngLineArt(pngBase64: string): LineArtAssessment {
+  const png = PNG.sync.read(Buffer.from(pngBase64, "base64"));
+  return assessLineArt(new Uint8ClampedArray(png.data), png.width, png.height);
 }

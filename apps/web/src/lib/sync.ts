@@ -31,6 +31,7 @@ interface StoryRow {
   child_name: string | null;
   title: string | null;
   pages: string[] | null;
+  page_art: (string | null)[] | null;
   created_at: string;
 }
 
@@ -41,6 +42,7 @@ const toRow = (s: StoryRecord) => ({
   child_name: s.childName ?? null,
   title: s.title ?? null,
   pages: s.pagesText ?? null,
+  page_art: s.pageArt ?? null,
   created_at: s.createdAt,
 });
 
@@ -50,6 +52,7 @@ const fromRow = (r: StoryRow): StoryRecord => ({
   settingKey: r.setting_key as SettingKey,
   ...(r.child_name ? { childName: r.child_name } : {}),
   ...(r.title && r.pages ? { title: r.title, pagesText: r.pages } : {}),
+  ...(r.page_art?.some(Boolean) ? { pageArt: r.page_art } : {}),
   createdAt: r.created_at,
 });
 
