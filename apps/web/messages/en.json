@@ -77,6 +77,8 @@
     "signOut": "Sign out",
     "checkEmail": "Almost there! Open your email and tap the confirmation link.",
     "signedInAs": "Signed in as {email}",
+    "planFree": "Free plan",
+    "planPremium": "✨ Premium",
     "syncNow": "Sync now",
     "syncing": "Syncing...",
     "synced": "{count, plural, =1 {1 story is} other {# stories are}} safe in the cloud",

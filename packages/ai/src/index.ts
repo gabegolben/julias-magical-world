@@ -5,6 +5,7 @@ export * from "./prompts/illustration.ts";
 export * from "./providers/types.ts";
 export * from "./providers/anthropic.ts";
 export * from "./providers/openaiImage.ts";
+export * from "./providers/openaiModeration.ts";
 export * from "./providers/mock.ts";
 export * from "./run.ts";
 export * from "./quality.ts";

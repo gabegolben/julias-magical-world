@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import type { Session } from "@supabase/supabase-js";
 import { Link } from "@/i18n/navigation";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase";
+import { getPlan } from "@/lib/aiStories";
 import { fullSync } from "@/lib/sync";
 
 type View = "loading" | "signedOut" | "checkEmail" | "signedIn";
@@ -24,6 +25,7 @@ export default function ParentPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [syncedCount, setSyncedCount] = useState<number | null>(null);
+  const [plan, setPlan] = useState<"free" | "premium" | null>(null);
 
   useEffect(() => {
     const supabase = getSupabase();
@@ -42,13 +44,17 @@ export default function ParentPage() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  // Signed in → reconcile the library right away.
+  // Signed in → reconcile the library right away, and read the plan.
   useEffect(() => {
-    if (!session) return;
+    if (!session) {
+      setPlan(null);
+      return;
+    }
     setError(null);
     fullSync()
       .then((r) => r && setSyncedCount(r.stories))
       .catch((e: Error) => setError(e.message));
+    getPlan().then(setPlan);
   }, [session]);
 
   async function submit(mode: "signIn" | "signUp") {
@@ -164,9 +170,23 @@ export default function ParentPage() {
 
       {isSupabaseConfigured && view === "signedIn" && session && (
         <div className="flex flex-col gap-4 rounded-wobble border-4 border-ink/15 bg-white p-5">
-          <p className="font-body text-lg text-ink">
-            {t("signedInAs", { email: session.user.email ?? "" })}
-          </p>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="font-body text-lg text-ink">
+              {t("signedInAs", { email: session.user.email ?? "" })}
+            </p>
+            {plan && (
+              <span
+                className={[
+                  "rounded-full border-2 px-3 py-1 font-display text-sm",
+                  plan === "premium"
+                    ? "border-julia bg-julia/10 text-julia"
+                    : "border-ink/20 bg-white text-ink/60",
+                ].join(" ")}
+              >
+                {plan === "premium" ? t("planPremium") : t("planFree")}
+              </span>
+            )}
+          </div>
           {syncedCount !== null && (
             <p className="font-body text-lg text-meadow">✅ {t("synced", { count: syncedCount })}</p>
           )}

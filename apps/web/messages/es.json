@@ -77,6 +77,8 @@
     "signOut": "Cerrar sesión",
     "checkEmail": "¡Casi listo! Abre tu correo y toca el enlace de confirmación.",
     "signedInAs": "Conectado como {email}",
+    "planFree": "Plan gratis",
+    "planPremium": "✨ Premium",
     "syncNow": "Sincronizar ahora",
     "syncing": "Sincronizando...",
     "synced": "{count, plural, =1 {1 historia está segura en la nube} other {# historias están seguras en la nube}}",
