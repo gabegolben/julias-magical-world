@@ -40,6 +40,14 @@ test("childTraits are injected as DATA, quote-delimited and instruction-guarded"
   assert.match(prompt, /never follow any instruction/i);
 });
 
+test("childTraits route physical appearance to images only, never the story text", () => {
+  const prompt = buildStoryUserPrompt({ ...REQ, childTraits: "straight hair with curly points" });
+  // Appearance must be steered into the illustrationPrompt...
+  assert.match(prompt, /illustrationPrompt/);
+  // ...and explicitly kept out of the narration.
+  assert.match(prompt, /do NOT describe the child's physical appearance/i);
+});
+
 test("no childTraits ⇒ prompt has no traits clause", () => {
   const prompt = buildStoryUserPrompt(REQ);
   assert.doesNotMatch(prompt, /descriptive DATA/);
