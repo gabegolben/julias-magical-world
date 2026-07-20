@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { StoryBuilder } from "@/components/magic-mode/StoryBuilder";
 import { createStory, sanitizeChildName, type CharacterKey, type SettingKey } from "@/lib/stories";
-import { generateAiStory } from "@/lib/aiStories";
+import { generateAiStory, getPlan } from "@/lib/aiStories";
 import { pushStory } from "@/lib/sync";
 
 /**
@@ -19,12 +19,20 @@ export default function CreatePage() {
   const locale = useLocale();
   const t = useTranslations("generating");
   const [generating, setGenerating] = useState(false);
+  const [premium, setPremium] = useState(false);
+
+  // Premium unlocks the free-text "about your child" field. Server re-checks
+  // the tier regardless, so this only decides what the form offers.
+  useEffect(() => {
+    getPlan().then((plan) => setPremium(plan === "premium"));
+  }, []);
 
   async function handleCreate(
     characterKey: string,
     settingKey: string,
     childName: string,
     childGender?: "boy" | "girl",
+    childTraits?: string,
   ) {
     setGenerating(true);
     const name = sanitizeChildName(childName);
@@ -36,6 +44,7 @@ export default function CreatePage() {
         language: locale,
         ...(name ? { childName: name } : {}),
         ...(childGender ? { childGender } : {}),
+        ...(childTraits ? { childTraits } : {}),
       }),
       new Promise((resolve) => setTimeout(resolve, 2400)),
     ]);
@@ -67,7 +76,7 @@ export default function CreatePage() {
 
   return (
     <main className="min-h-dvh bg-paper">
-      <StoryBuilder onCreate={handleCreate} />
+      <StoryBuilder onCreate={handleCreate} premium={premium} />
     </main>
   );
 }

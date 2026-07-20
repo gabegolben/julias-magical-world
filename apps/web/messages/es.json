@@ -16,6 +16,8 @@
     "childGenderLabel": "Peque (opcional)",
     "genderBoy": "Niño",
     "genderGirl": "Niña",
+    "childTraitsLabel": "✨ Premium: cuéntanos sobre tu peque (opcional)",
+    "childTraitsPlaceholder": "p. ej. pelo rizado pelirrojo, ama los dinosaurios, valiente y amable",
     "characters": {
       "unicorn": "Unicornio",
       "dinosaur": "Dinosaurio",

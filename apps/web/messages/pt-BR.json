@@ -16,6 +16,8 @@
     "childGenderLabel": "Criança (opcional)",
     "genderBoy": "Menino",
     "genderGirl": "Menina",
+    "childTraitsLabel": "✨ Premium: conte sobre a criança (opcional)",
+    "childTraitsPlaceholder": "ex.: cabelo cacheado ruivo, adora dinossauros, corajosa e gentil",
     "characters": {
       "unicorn": "Unicórnio",
       "dinosaur": "Dinossauro",

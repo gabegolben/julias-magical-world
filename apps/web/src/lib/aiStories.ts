@@ -21,12 +21,32 @@ function fallback(reason: string): null {
   return null;
 }
 
+/**
+ * The signed-in parent's plan, read from their own profiles row (RLS lets a
+ * user read only their own). Drives premium-only UI. Defaults to "free" when
+ * signed out, unconfigured, or on any error — the server re-derives the tier
+ * anyway, so this only decides what the UI offers.
+ */
+export async function getPlan(): Promise<"free" | "premium"> {
+  try {
+    const supabase = getSupabase();
+    if (!supabase) return "free";
+    const { data: session } = await supabase.auth.getSession();
+    if (!session.session) return "free";
+    const { data } = await supabase.from("profiles").select("plan").maybeSingle();
+    return data?.plan === "premium" ? "premium" : "free";
+  } catch {
+    return "free";
+  }
+}
+
 export async function generateAiStory(params: {
   characterKey: CharacterKey;
   settingKey: SettingKey;
   language: string;
   childName?: string;
   childGender?: "boy" | "girl";
+  childTraits?: string;
 }): Promise<{ title: string; pagesText: string[]; pageArt: (string | null)[] } | null> {
   try {
     const supabase = getSupabase();
@@ -52,6 +72,7 @@ export async function generateAiStory(params: {
         language: params.language,
         ...(params.childName ? { childName: params.childName } : {}),
         ...(params.childGender ? { childGender: params.childGender } : {}),
+        ...(params.childTraits ? { childTraits: params.childTraits } : {}),
       }),
       signal: controller.signal,
     });

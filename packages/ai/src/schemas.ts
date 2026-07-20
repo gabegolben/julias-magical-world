@@ -38,5 +38,9 @@ export const StoryRequestSchema = z.object({
   style: z.enum(["STORYBOOK_CLASSIC", "CARTOON_BOLD", "WATERCOLOR_SOFT", "MANGA_SKETCH"]),
   childName: z.string().max(30).regex(/^[\p{L} \-']*$/u).optional(), // letters only — parent-entered
   childGender: ChildGenderSchema.optional(), // optional; refines hero pronouns + illustration
+  // Premium-only free text (personality/appearance). The app's ONLY free-text
+  // surface: length-capped, screened, prompt-framed as data, and the fail-
+  // closed output review still applies. Enforced premium-only in the API route.
+  childTraits: z.string().max(300).optional(),
 });
 export type StoryRequest = z.infer<typeof StoryRequestSchema>;

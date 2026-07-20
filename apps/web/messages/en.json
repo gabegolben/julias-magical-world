@@ -16,6 +16,8 @@
     "childGenderLabel": "Child (optional)",
     "genderBoy": "Boy",
     "genderGirl": "Girl",
+    "childTraitsLabel": "✨ Premium: tell us about your child (optional)",
+    "childTraitsPlaceholder": "e.g. curly red hair, loves dinosaurs, brave and kind",
     "characters": {
       "unicorn": "Unicorn",
       "dinosaur": "Dinosaur",

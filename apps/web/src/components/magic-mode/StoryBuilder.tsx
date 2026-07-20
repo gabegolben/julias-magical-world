@@ -18,19 +18,24 @@ type Gender = "boy" | "girl";
 
 export function StoryBuilder({
   onCreate,
+  premium = false,
 }: {
   onCreate: (
     characterKey: string,
     settingKey: string,
     childName: string,
     childGender?: Gender,
+    childTraits?: string,
   ) => void;
+  /** Premium parents get the optional free-text "about your child" field. */
+  premium?: boolean;
 }) {
   const t = useTranslations("create");
   const [character, setCharacter] = useState<string | null>(null);
   const [setting, setSetting] = useState<string | null>(null);
   const [childName, setChildName] = useState("");
   const [gender, setGender] = useState<Gender | null>(null);
+  const [traits, setTraits] = useState("");
 
   const step: "friend" | "place" | "ready" = !character ? "friend" : !setting ? "place" : "ready";
 
@@ -101,13 +106,36 @@ export function StoryBuilder({
               ))}
             </div>
           </div>
+
+          {/* Premium-only: free-text traits that enrich the story + art. */}
+          {premium && (
+            <label className="flex w-full max-w-md flex-col items-center gap-2 font-body text-sm text-ink/60">
+              {t("childTraitsLabel")}
+              <textarea
+                value={traits}
+                onChange={(e) => setTraits(e.target.value)}
+                placeholder={t("childTraitsPlaceholder")}
+                maxLength={300}
+                rows={3}
+                className="w-full resize-none rounded-wobble border-4 border-julia/40 bg-white px-4 py-2 text-center font-body text-lg text-ink outline-none focus:border-julia"
+              />
+            </label>
+          )}
         </div>
       )}
 
       {step === "ready" && character && setting && (
         <button
           type="button"
-          onClick={() => onCreate(character, setting, childName, gender ?? undefined)}
+          onClick={() =>
+            onCreate(
+              character,
+              setting,
+              childName,
+              gender ?? undefined,
+              premium && traits.trim() ? traits.trim() : undefined,
+            )
+          }
           className="min-h-tap rounded-wobble border-4 border-ink bg-sunshine px-10 font-display text-3xl text-ink shadow-[0_8px_0_#37305A] transition-transform motion-safe:active:translate-y-1 motion-safe:active:shadow-[0_4px_0_#37305A] focus-visible:outline-4 focus-visible:outline-julia focus-visible:outline-offset-4"
         >
           ✨ {t("makeMagic")}
