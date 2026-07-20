@@ -19,3 +19,21 @@ export function storyModelFor(tier: "free" | "premium"): string {
 export function reviewModel(): string {
   return validModelId(process.env.REVIEW_MODEL) ?? "claude-opus-4-8";
 }
+
+/** Same display-name guard for OpenAI image ids ("GPT Image 2" would 404). */
+function validImageModelId(id: string | undefined): string | null {
+  return id && /^[a-z0-9][a-z0-9.-]*$/.test(id) ? id : null;
+}
+
+/**
+ * Illustration model by tier. Premium falls back to the free model (never
+ * silently to a *pricier* default) when ILLUSTRATION_MODEL_PREMIUM is unset.
+ * Both unset ⇒ the bake-off winner.
+ */
+export function illustrationModelFor(tier: "free" | "premium"): string {
+  const free = validImageModelId(process.env.ILLUSTRATION_MODEL) ?? "gpt-image-1-mini";
+  if (tier === "premium") {
+    return validImageModelId(process.env.ILLUSTRATION_MODEL_PREMIUM) ?? free;
+  }
+  return free;
+}

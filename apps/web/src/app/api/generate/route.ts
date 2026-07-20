@@ -12,7 +12,7 @@ import {
   type GeneratedStory,
 } from "@jmw/ai";
 import { z } from "zod/v4";
-import { reviewModel, storyModelFor } from "../../../lib/modelEnv";
+import { illustrationModelFor, reviewModel, storyModelFor } from "../../../lib/modelEnv";
 
 /**
  * Real AI story generation (server mode only — absent from the GitHub Pages
@@ -57,8 +57,27 @@ const BodySchema = z.object({
   language: LanguageSchema,
   childName: z.string().max(30).regex(/^[\p{L} \-']*$/u).optional(),
   childGender: z.enum(["boy", "girl"]).optional(),
-  tier: z.enum(["free", "premium"]).default("free"),
 });
+
+type Tier = "free" | "premium";
+
+/**
+ * The tier is derived SERVER-SIDE from the profiles table (never from the
+ * request body — a client could claim anything). Missing row, missing table,
+ * or any error ⇒ free: failing closed to the cheap tier.
+ */
+async function tierFor(db: SupabaseClient, userId: string): Promise<Tier> {
+  const { data, error } = await db
+    .from("profiles")
+    .select("plan")
+    .eq("owner", userId)
+    .maybeSingle();
+  if (error) {
+    console.warn("profiles read failed (run migration 0007?):", error.message);
+    return "free";
+  }
+  return data?.plan === "premium" ? "premium" : "free";
+}
 
 // v0 fixes these; they still key the cache so a future age/style expansion
 // can't collide with entries generated under the old defaults.
@@ -100,11 +119,11 @@ function detemplatizeStory(story: StoryOut, name: string | undefined): StoryOut 
  * figure in the art; anonymous ones cast the character as hero — different
  * text AND different illustrations, so they must not share an entry).
  */
-function cacheKeyFor(body: z.infer<typeof BodySchema>): string {
+function cacheKeyFor(body: z.infer<typeof BodySchema>, tier: Tier): string {
   return [
     AGE_BAND,
     STYLE,
-    body.tier, // premium may use a better image model later — never share entries across tiers
+    tier, // premium uses a better image model — never share entries across tiers
     body.language,
     body.characterKey,
     body.settingKey,
@@ -201,8 +220,9 @@ async function illustratePages(
   db: SupabaseClient,
   story: GeneratedStory,
   budget: number,
+  model: string,
 ): Promise<{ artUrls: (string | null)[]; imagesGenerated: number }> {
-  const image = openaiImageModel(); // ILLUSTRATION_MODEL env (bake-off: gpt-image-1-mini)
+  const image = openaiImageModel({ model }); // tier-aware: see illustrationModelFor()
   const artDir = randomUUID(); // per-generation folder; unguessable, never overwritten
   let attempts = 0;
 
@@ -266,22 +286,25 @@ export async function POST(request: Request): Promise<Response> {
     { global: { headers: { Authorization: `Bearer ${token}` } } },
   );
 
-  // 2. Validate template-only input.
+  // 2. Validate template-only input, and resolve this parent's tier from the
+  //    profiles table (server-derived; the request can't claim it).
   const parsed = BodySchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return json({ error: "invalid request" }, 400);
   const body = parsed.data;
+  const tier = await tierFor(db, data.user.id);
 
   // 3. Cache: once a combination holds STORY_CACHE_VARIANTS distinct stories,
   //    serve one at random for free (name swapped in) — no AI/image spend, no
   //    quota. Below that count we fall through and generate a new variant, so
   //    each combination accrues variety over its first few requests.
-  const cacheKey = cacheKeyFor(body);
+  const cacheKey = cacheKeyFor(body, tier);
   const variants = await readCacheVariants(db, cacheKey);
   if (variants.length >= STORY_CACHE_VARIANTS) {
     const pick = variants[Math.floor(Math.random() * variants.length)];
     return json({
       status: "READY",
       cached: true,
+      tier,
       variants: variants.length,
       story: detemplatizeStory(pick, body.childName),
     });
@@ -308,7 +331,7 @@ export async function POST(request: Request): Promise<Response> {
         ...(body.childGender ? { childGender: body.childGender } : {}),
       },
       {
-        story: anthropicStoryModel({ model: storyModelFor(body.tier) }),
+        story: anthropicStoryModel({ model: storyModelFor(tier) }),
         // Explicit model so a bad REVIEW_MODEL env falls back instead of 404ing.
         reviewer: anthropicReviewer({ model: reviewModel() }),
         image: mockImageModel(), // images handled below with gate + storage
@@ -328,7 +351,7 @@ export async function POST(request: Request): Promise<Response> {
     if (process.env.OPENAI_API_KEY && IMAGE_DAILY_LIMIT > 0) {
       const budget = Math.max(0, IMAGE_DAILY_LIMIT - (await usedToday(db, "image")));
       if (budget > 0) {
-        const outcome = await illustratePages(db, result.story, budget);
+        const outcome = await illustratePages(db, result.story, budget, illustrationModelFor(tier));
         artUrls = outcome.artUrls;
         await recordUsage(db, "image", outcome.imagesGenerated);
       }
@@ -344,7 +367,7 @@ export async function POST(request: Request): Promise<Response> {
     //    served free at random.
     await writeCache(cacheKey, storyOut, body.childName);
 
-    return json({ status: "READY", cached: false, variants: variants.length + 1, story: storyOut });
+    return json({ status: "READY", cached: false, tier, variants: variants.length + 1, story: storyOut });
   } catch (err) {
     console.error("generate failed:", err);
     return json({ error: "generation failed" }, 502);

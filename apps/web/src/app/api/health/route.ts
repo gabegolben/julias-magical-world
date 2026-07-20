@@ -1,4 +1,4 @@
-import { reviewModel, storyModelFor } from "../../../lib/modelEnv";
+import { illustrationModelFor, reviewModel, storyModelFor } from "../../../lib/modelEnv";
 
 /**
  * Config health check: reports env PRESENCE only (never secret values).
@@ -19,7 +19,10 @@ export function GET(): Response {
     // Present ⇒ the shared story cache can be seeded (server-only writes).
     cacheWrites: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
     cacheVariants: process.env.STORY_CACHE_VARIANTS ?? "(unset → 3)",
-    illustrationModel: process.env.ILLUSTRATION_MODEL ?? "(unset → gpt-image-1)",
+    illustrationModel: process.env.ILLUSTRATION_MODEL ?? "(unset)",
+    illustrationModelPremium: process.env.ILLUSTRATION_MODEL_PREMIUM ?? "(unset)",
+    effectiveIllustrationFree: illustrationModelFor("free"),
+    effectiveIllustrationPremium: illustrationModelFor("premium"),
     storyDailyLimit: process.env.STORY_DAILY_LIMIT ?? "(unset → 15)",
     imageDailyLimit: process.env.IMAGE_DAILY_LIMIT ?? "(unset → 40)",
     supabaseUrl: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL),
