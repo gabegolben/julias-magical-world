@@ -76,6 +76,7 @@ cd packages/magic-fill && npm test
 | Premium tier | ✅ server-derived from `profiles.plan` (server-only writes — a client can't upgrade itself); premium gets `STORY_MODEL_PREMIUM` / `ILLUSTRATION_MODEL_PREMIUM`; cache entries never shared across tiers |
 | Premium "about your child" | ✅ optional free text (personality/appearance) enriching story + illustration prompts. The app's only free-text surface, so: premium-only (server-enforced), keyword-screened before spend, prompt-framed as data, output still fail-closed reviewed, personalized stories bypass the shared cache, raw text not persisted |
 | Premium story text editing | ✅ premium parents can edit page text + title in the reader (images untouched); edits save to their own story record + cloud row only — never to the shared `story_cache` |
+| Child profiles | ✅ save a child's name/gender/(premium) appearance once and pick them on the create screen; private per parent (`children` table, RLS owner-only), local-first with cloud sync; managed in the parent area |
 | Shared story/art cache | ✅ `story_cache` reuses prior generations for matching dimensions, swapping the name (`{{name}}` token) — zero AI/image spend on a hit. Keeps up to `STORY_CACHE_VARIANTS` (default 3) stories per combination and serves one at random for variety. Server-only writes via `SUPABASE_SERVICE_ROLE_KEY` (clients read-only, can't poison) |
 
 ## The magic-fill engine (why it matters)

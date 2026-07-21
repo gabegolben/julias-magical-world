@@ -6,7 +6,8 @@ import type { Session } from "@supabase/supabase-js";
 import { Link } from "@/i18n/navigation";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import { getPlan } from "@/lib/aiStories";
-import { fullSync } from "@/lib/sync";
+import { deleteChild, listChildren, type ChildProfile } from "@/lib/children";
+import { fullSync, removeChild } from "@/lib/sync";
 
 type View = "loading" | "signedOut" | "checkEmail" | "signedIn";
 
@@ -26,6 +27,7 @@ export default function ParentPage() {
   const [error, setError] = useState<string | null>(null);
   const [syncedCount, setSyncedCount] = useState<number | null>(null);
   const [plan, setPlan] = useState<"free" | "premium" | null>(null);
+  const [children, setChildren] = useState<ChildProfile[]>([]);
 
   useEffect(() => {
     const supabase = getSupabase();
@@ -52,10 +54,20 @@ export default function ParentPage() {
     }
     setError(null);
     fullSync()
-      .then((r) => r && setSyncedCount(r.stories))
+      .then((r) => {
+        if (r) setSyncedCount(r.stories);
+        setChildren(listChildren()); // refresh after sync merges cloud profiles
+      })
       .catch((e: Error) => setError(e.message));
     getPlan().then(setPlan);
+    setChildren(listChildren());
   }, [session]);
+
+  function handleDeleteChild(id: string) {
+    deleteChild(id);
+    setChildren(listChildren());
+    void removeChild(id);
+  }
 
   async function submit(mode: "signIn" | "signUp") {
     const supabase = getSupabase();
@@ -209,6 +221,35 @@ export default function ParentPage() {
               {t("signOut")}
             </button>
           </div>
+        </div>
+      )}
+
+      {isSupabaseConfigured && view === "signedIn" && (
+        <div className="flex flex-col gap-3 rounded-wobble border-4 border-ink/15 bg-white p-5">
+          <h2 className="font-display text-2xl text-ink">👧 {t("children")}</h2>
+          {children.length === 0 ? (
+            <p className="font-body text-sm text-ink/60">{t("noChildren")}</p>
+          ) : (
+            <ul className="flex flex-col gap-2">
+              {children.map((c) => (
+                <li key={c.id} className="flex items-center justify-between gap-3 rounded-wobble border-2 border-ink/10 px-4 py-2">
+                  <span className="font-display text-lg text-ink">
+                    {c.gender === "boy" ? "👦 " : c.gender === "girl" ? "👧 " : ""}
+                    {c.name}
+                    {c.traits && <span className="ml-2 font-body text-sm text-ink/50">— {c.traits}</span>}
+                  </span>
+                  <button
+                    type="button"
+                    aria-label={t("deleteChild", { name: c.name })}
+                    onClick={() => handleDeleteChild(c.id)}
+                    className="rounded-wobble border-2 border-ink/20 bg-white px-3 py-1 font-display text-lg text-ink/70"
+                  >
+                    🗑
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 

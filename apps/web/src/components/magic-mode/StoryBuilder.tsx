@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { OptionCard } from "./OptionCard";
 import { CHARACTER_EMOJI, CHARACTER_KEYS, SETTING_EMOJI, SETTING_KEYS } from "@/lib/stories";
+import type { ChildProfile } from "@/lib/children";
 
 const CHARACTERS = CHARACTER_KEYS.map((key) => ({ key, emoji: CHARACTER_EMOJI[key] }));
 const SETTINGS = SETTING_KEYS.map((key) => ({ key, emoji: SETTING_EMOJI[key] }));
@@ -19,6 +20,8 @@ type Gender = "boy" | "girl";
 export function StoryBuilder({
   onCreate,
   premium = false,
+  children = [],
+  onRememberChild,
 }: {
   onCreate: (
     characterKey: string,
@@ -29,6 +32,10 @@ export function StoryBuilder({
   ) => void;
   /** Premium parents get the optional free-text "about your child" field. */
   premium?: boolean;
+  /** Saved child profiles to pick from (pre-fills the fields). */
+  children?: ChildProfile[];
+  /** Persist the current name/gender/traits as a reusable profile. */
+  onRememberChild?: (input: { name: string; gender?: Gender; traits?: string }) => void;
 }) {
   const t = useTranslations("create");
   const [character, setCharacter] = useState<string | null>(null);
@@ -36,6 +43,32 @@ export function StoryBuilder({
   const [childName, setChildName] = useState("");
   const [gender, setGender] = useState<Gender | null>(null);
   const [traits, setTraits] = useState("");
+  const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
+  const [remembered, setRemembered] = useState(false);
+
+  function pickChild(child: ChildProfile) {
+    setSelectedChildId(child.id);
+    setChildName(child.name);
+    setGender(child.gender ?? null);
+    setTraits(premium ? (child.traits ?? "") : "");
+    setRemembered(false);
+  }
+  function pickNewChild() {
+    setSelectedChildId(null);
+    setChildName("");
+    setGender(null);
+    setTraits("");
+    setRemembered(false);
+  }
+  function rememberChild() {
+    if (!childName.trim() || !onRememberChild) return;
+    onRememberChild({
+      name: childName.trim(),
+      ...(gender ? { gender } : {}),
+      ...(premium && traits.trim() ? { traits: traits.trim() } : {}),
+    });
+    setRemembered(true);
+  }
 
   const step: "friend" | "place" | "ready" = !character ? "friend" : !setting ? "place" : "ready";
 
@@ -65,12 +98,48 @@ export function StoryBuilder({
 
       {step === "ready" && (
         <div className="flex flex-col items-center gap-4">
+          {/* Saved child profiles — tap to pre-fill the fields below. */}
+          {children.length > 0 && (
+            <div className="flex flex-col items-center gap-2 font-body text-sm text-ink/60">
+              {t("childPickerLabel")}
+              <div className="flex flex-wrap justify-center gap-2">
+                {children.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => pickChild(c)}
+                    className={[
+                      "min-h-tap rounded-wobble border-4 px-4 py-2 font-display text-lg transition-transform",
+                      selectedChildId === c.id
+                        ? "border-ink bg-julia text-white"
+                        : "border-ink/20 bg-white text-ink",
+                    ].join(" ")}
+                  >
+                    {c.gender === "boy" ? "👦 " : c.gender === "girl" ? "👧 " : ""}
+                    {c.name}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={pickNewChild}
+                  className="min-h-tap rounded-wobble border-4 border-dashed border-ink/30 bg-white px-4 py-2 font-display text-lg text-ink/70"
+                >
+                  {t("childNew")}
+                </button>
+              </div>
+            </div>
+          )}
+
           <label className="flex flex-col items-center gap-2 font-body text-sm text-ink/60">
             {t("childNameLabel")}
             <input
               type="text"
               value={childName}
-              onChange={(e) => setChildName(e.target.value)}
+              onChange={(e) => {
+                setChildName(e.target.value);
+                setSelectedChildId(null);
+                setRemembered(false);
+              }}
               placeholder={t("childNamePlaceholder")}
               maxLength={20}
               autoComplete="off"
@@ -113,13 +182,31 @@ export function StoryBuilder({
               {t("childTraitsLabel")}
               <textarea
                 value={traits}
-                onChange={(e) => setTraits(e.target.value)}
+                onChange={(e) => {
+                  setTraits(e.target.value);
+                  setRemembered(false);
+                }}
                 placeholder={t("childTraitsPlaceholder")}
                 maxLength={300}
                 rows={3}
                 className="w-full resize-none rounded-wobble border-4 border-julia/40 bg-white px-4 py-2 text-center font-body text-lg text-ink outline-none focus:border-julia"
               />
             </label>
+          )}
+
+          {/* Remember the current details as a reusable profile. */}
+          {onRememberChild && childName.trim() && (
+            remembered ? (
+              <p role="status" className="font-body text-sm text-meadow">✅ {t("childRemembered")}</p>
+            ) : (
+              <button
+                type="button"
+                onClick={rememberChild}
+                className="rounded-wobble border-4 border-ink/20 bg-white px-5 py-2 font-body text-sm text-ink/70 motion-safe:active:translate-y-0.5"
+              >
+                {t("rememberChild")}
+              </button>
+            )
           )}
         </div>
       )}

@@ -23,6 +23,7 @@ import {
   type SettingKey,
   type StoryRecord,
 } from "./stories";
+import { importChildren, listChildren, type ChildProfile } from "./children";
 
 interface StoryRow {
   id: string;
@@ -64,6 +65,52 @@ async function signedInClient() {
   if (!supabase) return null;
   const { data } = await supabase.auth.getSession();
   return data.session ? supabase : null;
+}
+
+interface ChildRow {
+  id: string;
+  name: string;
+  gender: string | null;
+  traits: string | null;
+  created_at: string;
+}
+
+const childToRow = (c: ChildProfile) => ({
+  id: c.id,
+  name: c.name,
+  gender: c.gender ?? null,
+  traits: c.traits ?? null,
+  created_at: c.createdAt,
+});
+
+const childFromRow = (r: ChildRow): ChildProfile => ({
+  id: r.id,
+  name: r.name,
+  ...(r.gender === "boy" || r.gender === "girl" ? { gender: r.gender } : {}),
+  ...(r.traits ? { traits: r.traits } : {}),
+  createdAt: r.created_at,
+});
+
+/** Push one child profile (called right after saving one). */
+export async function pushChild(child: ChildProfile): Promise<void> {
+  try {
+    const supabase = await signedInClient();
+    if (!supabase) return;
+    await supabase.from("children").upsert(childToRow(child));
+  } catch {
+    // Offline/transient — fullSync reconciles.
+  }
+}
+
+/** Delete one child profile from the cloud (local delete is separate). */
+export async function removeChild(id: string): Promise<void> {
+  try {
+    const supabase = await signedInClient();
+    if (!supabase) return;
+    await supabase.from("children").delete().eq("id", id);
+  } catch {
+    // Best-effort.
+  }
 }
 
 /** Push one story record (called right after creation). */
@@ -118,6 +165,14 @@ export async function fullSync(): Promise<SyncResult | null> {
     if (row.ops.length > loadOps(row.story_id, row.page).length) {
       saveOps(row.story_id, row.page, row.ops);
     }
+  }
+
+  // Child profiles (best-effort: absent table pre-migration must not break sync).
+  const { data: remoteChildren, error: childError } = await supabase.from("children").select("*");
+  if (!childError && remoteChildren) {
+    importChildren((remoteChildren as ChildRow[]).map(childFromRow));
+    const localChildren = listChildren();
+    if (localChildren.length > 0) await supabase.from("children").upsert(localChildren.map(childToRow));
   }
 
   const local = listStories();

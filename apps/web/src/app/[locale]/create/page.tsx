@@ -6,7 +6,8 @@ import { useRouter } from "@/i18n/navigation";
 import { StoryBuilder } from "@/components/magic-mode/StoryBuilder";
 import { createStory, sanitizeChildName, type CharacterKey, type SettingKey } from "@/lib/stories";
 import { generateAiStory, getPlan } from "@/lib/aiStories";
-import { pushStory } from "@/lib/sync";
+import { listChildren, saveChild, type ChildProfile } from "@/lib/children";
+import { pushChild, pushStory } from "@/lib/sync";
 
 /**
  * Story creation. Signed-in parents on the server build get a real
@@ -20,12 +21,20 @@ export default function CreatePage() {
   const t = useTranslations("generating");
   const [generating, setGenerating] = useState(false);
   const [premium, setPremium] = useState(false);
+  const [children, setChildren] = useState<ChildProfile[]>([]);
 
   // Premium unlocks the free-text "about your child" field. Server re-checks
   // the tier regardless, so this only decides what the form offers.
   useEffect(() => {
     getPlan().then((plan) => setPremium(plan === "premium"));
+    setChildren(listChildren());
   }, []);
+
+  function rememberChild(input: { name: string; gender?: "boy" | "girl"; traits?: string }) {
+    const saved = saveChild(input);
+    setChildren(listChildren());
+    void pushChild(saved); // sync to the parent's private children table
+  }
 
   async function handleCreate(
     characterKey: string,
@@ -76,7 +85,12 @@ export default function CreatePage() {
 
   return (
     <main className="min-h-dvh bg-paper">
-      <StoryBuilder onCreate={handleCreate} premium={premium} />
+      <StoryBuilder
+        onCreate={handleCreate}
+        premium={premium}
+        children={children}
+        onRememberChild={rememberChild}
+      />
     </main>
   );
 }
