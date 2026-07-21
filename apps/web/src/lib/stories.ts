@@ -119,6 +119,26 @@ export function createStory(
   return story;
 }
 
+/**
+ * Overwrite a story's text (premium editing). Materializes it into a
+ * text-carrying (AI-shaped) record so the edit is what renders everywhere;
+ * illustrations are untouched. Persists to the local library only — the
+ * shared story_cache is written server-side at generation time and is never
+ * affected by a user's edits.
+ */
+export function updateStoryText(
+  id: string,
+  updates: { title: string; pagesText: string[] },
+): StoryRecord | undefined {
+  const all = listStories();
+  const idx = all.findIndex((s) => s.id === id);
+  if (idx === -1) return undefined;
+  const updated: StoryRecord = { ...all[idx], title: updates.title, pagesText: updates.pagesText };
+  all[idx] = updated;
+  window.localStorage.setItem(STORIES_KEY, JSON.stringify(all));
+  return updated;
+}
+
 /** Merge remote records into the local library (by id, newest first). */
 export function importStories(records: StoryRecord[]): void {
   const local = listStories();

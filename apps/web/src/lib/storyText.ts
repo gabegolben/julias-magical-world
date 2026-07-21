@@ -1,5 +1,5 @@
 import type { useTranslations } from "next-intl";
-import type { StoryRecord } from "./stories";
+import { storyPageCount, type StoryRecord } from "./stories";
 
 type Translator = ReturnType<typeof useTranslations>;
 
@@ -29,5 +29,21 @@ export function storyStrings(t: Translator, story: StoryRecord) {
   return {
     title: t(`${plot}.title`, { name }),
     pageText: (page: number) => t(`${plot}.page${page + 1}`, { name, intro }),
+  };
+}
+
+/**
+ * Snapshot a story's current text as an editable {title, pagesText}. AI
+ * stories return their own text; template stories resolve every page in the
+ * current locale so an edit becomes the story's own fixed text.
+ */
+export function materializeStoryText(
+  t: Translator,
+  story: StoryRecord,
+): { title: string; pagesText: string[] } {
+  const { title, pageText } = storyStrings(t, story);
+  return {
+    title,
+    pagesText: Array.from({ length: storyPageCount(story) }, (_, i) => pageText(i)),
   };
 }

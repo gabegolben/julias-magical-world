@@ -6,13 +6,15 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ColoringCanvas } from "@/components/coloring/ColoringCanvas";
 import { lineArtDataUrl } from "@/lib/lineArt";
-import { storyStrings } from "@/lib/storyText";
-import { pushOpsDebounced } from "@/lib/sync";
+import { materializeStoryText, storyStrings } from "@/lib/storyText";
+import { getPlan } from "@/lib/aiStories";
+import { pushOpsDebounced, pushStory } from "@/lib/sync";
 import {
   getStory,
   loadOps,
   saveOps,
   storyPageCount,
+  updateStoryText,
   type StoryRecord,
 } from "@/lib/stories";
 
@@ -33,9 +35,16 @@ function StoryView() {
   const [story, setStory] = useState<StoryRecord | null | undefined>(undefined);
   const [page, setPage] = useState(0);
   const [finished, setFinished] = useState(false);
+  const [premium, setPremium] = useState(false);
+  // Editing draft (premium): null when not editing.
+  const [draft, setDraft] = useState<{ title: string; pagesText: string[] } | null>(null);
+  const [justSaved, setJustSaved] = useState(false);
 
   useEffect(() => setStory(getStory(id) ?? null), [id]);
   useEffect(() => () => window.speechSynthesis?.cancel(), [page, finished]);
+  useEffect(() => {
+    getPlan().then((p) => setPremium(p === "premium"));
+  }, []);
 
   if (story === undefined) return <main className="min-h-dvh bg-paper" />;
 
@@ -53,6 +62,7 @@ function StoryView() {
   const { title, pageText } = storyStrings(t, story);
   const text = pageText(page);
   const totalPages = storyPageCount(story);
+  const record = story; // narrowed (non-null) for use inside the edit closures
 
   function readAloud() {
     if (!("speechSynthesis" in window)) return;
@@ -61,6 +71,24 @@ function StoryView() {
     u.rate = 0.9;
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(u);
+  }
+
+  // Premium text editing. Edits live in the parent's own story record only —
+  // the shared story_cache is written server-side and never touched here.
+  function startEdit() {
+    setJustSaved(false);
+    setDraft(materializeStoryText(t, record));
+  }
+  function saveEdit() {
+    if (!draft) return;
+    const updated = updateStoryText(record.id, draft);
+    if (updated) {
+      setStory(updated);
+      void pushStory(updated); // sync to the parent's own row (RLS owner), not the cache
+    }
+    setDraft(null);
+    setJustSaved(true);
+    setTimeout(() => setJustSaved(false), 2500);
   }
 
   if (finished) {
@@ -102,14 +130,73 @@ function StoryView() {
       </header>
 
       <div className="flex w-full flex-col items-center gap-3 rounded-wobble border-4 border-ink/15 bg-white/70 p-4">
-        <p className="max-w-xl text-center font-body text-xl leading-relaxed text-ink sm:text-2xl">{text}</p>
-        <button
-          type="button"
-          onClick={readAloud}
-          className="min-h-tap rounded-wobble border-4 border-ink/20 bg-sky px-6 py-2 font-display text-lg text-ink motion-safe:active:translate-y-1"
-        >
-          🔊 {t("story.readToMe")}
-        </button>
+        {draft ? (
+          <>
+            {page === 0 && (
+              <input
+                value={draft.title}
+                onChange={(e) => setDraft({ ...draft, title: e.target.value })}
+                aria-label={t("story.editTitle")}
+                maxLength={80}
+                className="w-full max-w-xl rounded-wobble border-4 border-julia/40 bg-white px-3 py-2 text-center font-display text-2xl text-ink outline-none focus:border-julia"
+              />
+            )}
+            <textarea
+              value={draft.pagesText[page] ?? ""}
+              onChange={(e) => {
+                const next = draft.pagesText.slice();
+                next[page] = e.target.value;
+                setDraft({ ...draft, pagesText: next });
+              }}
+              rows={4}
+              maxLength={400}
+              className="w-full max-w-xl resize-none rounded-wobble border-4 border-julia/40 bg-white px-3 py-2 text-center font-body text-xl leading-relaxed text-ink outline-none focus:border-julia"
+            />
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={saveEdit}
+                className="min-h-tap rounded-wobble border-4 border-ink bg-meadow px-6 py-2 font-display text-lg text-ink motion-safe:active:translate-y-1"
+              >
+                {t("story.save")}
+              </button>
+              <button
+                type="button"
+                onClick={() => setDraft(null)}
+                className="min-h-tap rounded-wobble border-4 border-ink/20 bg-white px-6 py-2 font-display text-lg text-ink"
+              >
+                {t("story.cancel")}
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="max-w-xl text-center font-body text-xl leading-relaxed text-ink sm:text-2xl">{text}</p>
+            {justSaved && (
+              <p role="status" className="font-body text-sm text-meadow">
+                ✅ {t("story.edited")}
+              </p>
+            )}
+            <div className="flex flex-wrap justify-center gap-3">
+              <button
+                type="button"
+                onClick={readAloud}
+                className="min-h-tap rounded-wobble border-4 border-ink/20 bg-sky px-6 py-2 font-display text-lg text-ink motion-safe:active:translate-y-1"
+              >
+                🔊 {t("story.readToMe")}
+              </button>
+              {premium && (
+                <button
+                  type="button"
+                  onClick={startEdit}
+                  className="min-h-tap rounded-wobble border-4 border-julia/40 bg-white px-6 py-2 font-display text-lg text-julia motion-safe:active:translate-y-1"
+                >
+                  {t("story.editText")}
+                </button>
+              )}
+            </div>
+          </>
+        )}
       </div>
 
       <ColoringCanvas
@@ -125,7 +212,7 @@ function StoryView() {
         }}
       />
 
-      <nav className="flex w-full items-center justify-between gap-4">
+      <nav className={`w-full items-center justify-between gap-4 ${draft ? "hidden" : "flex"}`}>
         <button
           type="button"
           onClick={() => setPage((p) => Math.max(0, p - 1))}
